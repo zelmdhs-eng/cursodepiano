@@ -1,6 +1,6 @@
-logoType: text
-logoText: "Curso de Piano"
-logoImage: ""
+logoType: image
+logoText: "Curso de Piano Online"
+logoImage: "/images/logo-curso-piano.png"
 items:
   - label: Home
     href: /
