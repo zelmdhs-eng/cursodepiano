@@ -1,6 +1,6 @@
 logoType: image
 logoText: "Curso de Piano Online"
-logoImage: "/images/logo-curso-piano.png"
+logoImage: "/logo-curso-piano.webp"
 items:
   - label: Home
     href: /
