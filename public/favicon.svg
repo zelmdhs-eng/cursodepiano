@@ -1,4 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect x="0" y="0" width="100" height="100" rx="25" ry="25" fill="#1e0240"/>
-  <text x="50%" y="56%" dominant-baseline="middle" text-anchor="middle" font-family="serif" font-size="55" font-weight="bold" fill="#fbbf24">SQ</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="12" fill="#0a0a0a"/>
+  <!-- Piano keyboard base -->
+  <rect x="8" y="20" width="48" height="28" rx="3" fill="white"/>
+  <!-- Black keys -->
+  <rect x="15" y="20" width="7" height="17" rx="2" fill="#111"/>
+  <rect x="26" y="20" width="7" height="17" rx="2" fill="#111"/>
+  <rect x="43" y="20" width="7" height="17" rx="2" fill="#111"/>
+  <!-- Musical note overlay with gradient -->
+  <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#a855f7"/>
+    <stop offset="100%" stop-color="#ec4899"/>
+  </linearGradient>
+  <circle cx="48" cy="10" r="8" fill="url(#g)"/>
+  <text x="48" y="14" text-anchor="middle" font-size="10" font-weight="bold" fill="white" font-family="sans-serif">♪</text>
 </svg>

@@ -21,15 +21,15 @@ const siteSettings = await getEntry('siteSettings', 'settings').catch(() => null
 
 const { 
     title = siteSettings?.data?.siteName || "Curso de Piano Online",
-    description = siteSettings?.data?.description || "Mentoria de Física Quântica e Metafísica",
+    description = siteSettings?.data?.description || "Aprenda a tocar piano online, direto ao ponto e sem enrolação.",
     ogImage = "/images/og-default.png",
     pageType = 'website',
-    authorName = "Paula Franco",
+    authorName = "Professor de Piano",
     publishedDate,
 } = Astro.props;
 
 const keywords = siteSettings?.data?.keywords || "";
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://paulafranco.com.br');
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://cursodepiano.com.br');
 
 // --- JSON-LD Schema Generation ---
 const schema: any = {
@@ -41,7 +41,7 @@ if (pageType === 'website') {
     schema["name"] = title;
     schema["url"] = canonicalURL.href;
     schema["description"] = description;
-    schema["logo"] = new URL('/favicon.svg', Astro.site || 'https://paulafranco.com.br').href;
+    schema["logo"] = new URL('/favicon.svg', Astro.site || 'https://cursodepiano.com.br').href;
 } else if (pageType === 'article') {
     schema["@type"] = "BlogPosting";
     schema["headline"] = title;
@@ -53,7 +53,7 @@ if (pageType === 'website') {
         };
     }
     if (publishedDate) schema["datePublished"] = publishedDate;
-    schema["image"] = new URL(ogImage, Astro.site || 'https://paulafranco.com.br').href;
+    schema["image"] = new URL(ogImage, Astro.site || 'https://cursodepiano.com.br').href;
 } else if (pageType === 'contact') {
     schema["@type"] = "ContactPage";
     schema["name"] = title;
