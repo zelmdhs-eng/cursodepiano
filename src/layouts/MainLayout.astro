@@ -20,7 +20,7 @@ interface Props {
 const siteSettings = await getEntry('siteSettings', 'settings').catch(() => null);
 
 const { 
-    title = siteSettings?.data?.siteName || "Soberania Quântica",
+    title = siteSettings?.data?.siteName || "Curso de Piano Online",
     description = siteSettings?.data?.description || "Mentoria de Física Quântica e Metafísica",
     ogImage = "/images/og-default.png",
     pageType = 'website',
