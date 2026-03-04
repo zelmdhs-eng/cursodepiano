@@ -1,0 +1,366 @@
+---
+/**
+ * admin/index.astro
+ * 
+ * Página principal do dashboard administrativo.
+ * Exibe visão geral do sistema com estatísticas, posts recentes e ações rápidas.
+ * Design moderno e informativo, rival do WordPress em funcionalidade mas superior em performance.
+ * 
+ * Widgets incluídos:
+ * - Cards estatísticos (Posts, Autores, Categorias, Temas)
+ * - Lista de posts recentes
+ * - Ações rápidas para criação de conteúdo
+ * - Links diretos para o Keystatic
+ */
+
+import { getCollection } from 'astro:content';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import StatCard from '../../components/admin/StatCard.astro';
+import RecentPosts from '../../components/admin/RecentPosts.astro';
+import ConfigStatus from '../../components/admin/ConfigStatus.astro';
+import OnboardingTour from '../../components/admin/OnboardingTour.astro';
+import { verifySession, SESSION_COOKIE } from '../../utils/auth-utils';
+
+// ─── Autenticação ─────────────────────────────────────────────────────────────
+const token = Astro.cookies.get(SESSION_COOKIE)?.value;
+const sessionUser = token ? verifySession(token) : null;
+if (!sessionUser) return Astro.redirect('/admin/login');
+
+// ─── Dados do dashboard ───────────────────────────────────────────────────────
+const posts      = await getCollection('posts');
+const authors    = await getCollection('authors');
+const categories = await getCollection('categories');
+
+const publishedPosts = posts.filter(p => p.data.publishedDate);
+const draftPosts     = posts.length - publishedPosts.length;
+const isAdmin        = sessionUser.adminRole === 'admin';
+
+// Detecta se está usando a conta/senha padrão do template
+const isDefaultAccount = sessionUser.slug === 'admin';
+---
+
+<AdminLayout title="Dashboard">
+
+    <!-- Dados para o OnboardingTour (lidos pelo script client-side) -->
+    <div
+        id="tour-server-data"
+        data-post-count={posts.length}
+        data-category-count={categories.length}
+        data-is-default-account={isDefaultAccount ? 'true' : 'false'}
+        style="display:none;"
+    ></div>
+
+    <!-- Aviso de conta padrão -->
+    {isDefaultAccount && (
+        <div style="margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: 0.75rem; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.35); display: flex; align-items: flex-start; gap: 0.75rem;">
+            <span style="font-size: 1.25rem; flex-shrink: 0;">⚠️</span>
+            <div>
+                <p style="font-size: 0.875rem; font-weight: 600; color: #fbbf24; margin-bottom: 0.25rem;">Você está usando a conta padrão do template</p>
+                <p style="font-size: 0.8rem; color: #a3a3a3; margin-bottom: 0.5rem;">
+                    Por segurança, altere o e-mail e a senha padrão (<strong style="color: #e5e5e5;">admin@admin.com</strong>) o quanto antes.
+                </p>
+                <a href="/admin/authors" style="font-size: 0.78rem; font-weight: 600; color: #fbbf24; text-decoration: underline;">
+                    → Ir para Autores e editar minha conta
+                </a>
+            </div>
+        </div>
+    )}
+
+    <div class="flex items-start justify-between flex-wrap gap-4 mb-6">
+        <div>
+            <h1 class="text-3xl font-heading font-bold text-[#e5e5e5] mb-1">Dashboard</h1>
+            <p class="text-[#a3a3a3] text-sm">Olá, <strong class="text-white">{sessionUser.name}</strong> — visão geral do seu site</p>
+        </div>
+        <!-- Badge de versão (compacto, visível sempre) -->
+        <div id="version-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs" style="background: var(--admin-surface); border: 1px solid var(--admin-border);">
+            <span id="version-badge-icon">⏳</span>
+            <span id="version-badge-text" class="text-[#737373]">Verificando versão...</span>
+        </div>
+    </div>
+
+    <!-- Banner de atualização disponível (aparece só quando há update) -->
+    <div id="version-update-banner" class="hidden mb-6 rounded-xl overflow-hidden" style="border: 1px solid rgba(234,179,8,0.4); background: linear-gradient(135deg, rgba(234,179,8,0.08) 0%, rgba(234,179,8,0.04) 100%);">
+        <div class="flex items-center justify-between flex-wrap gap-4 p-4">
+            <div class="flex items-center gap-3">
+                <div class="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-lg" style="background: rgba(234,179,8,0.15);">🔔</div>
+                <div>
+                    <div class="text-sm font-bold" style="color: #fbbf24;" id="update-banner-title">Nova versão disponível</div>
+                    <div class="text-xs mt-0.5" style="color: #a3a3a3;" id="update-banner-subtitle">Clique em "Aplicar agora" para atualizar com 1 clique</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <a id="update-banner-changelog" href="#" target="_blank" class="hidden text-xs px-3 py-1.5 rounded-lg transition-all" style="border: 1px solid rgba(234,179,8,0.25); color: #fbbf24; text-decoration: none;">
+                    Ver novidades →
+                </a>
+                <button
+                    id="version-update-btn"
+                    class="text-xs px-5 py-2 rounded-lg font-bold transition-all flex items-center gap-2"
+                    style="background: rgba(234,179,8,0.2); border: 1px solid rgba(234,179,8,0.45); color: #fbbf24;"
+                >
+                    🔄 Aplicar agora
+                </button>
+            </div>
+        </div>
+        <div id="version-update-status" class="hidden px-4 pb-4">
+            <div id="version-update-status-inner" class="text-xs px-3 py-2 rounded-lg"></div>
+        </div>
+    </div>
+
+    <!-- Onboarding: Checklist de primeiros passos -->
+    <div id="tour-checklist">
+        <OnboardingTour
+            postCount={posts.length}
+            categoryCount={categories.length}
+            isDefaultAccount={isDefaultAccount}
+        />
+    </div>
+
+    <!-- Stats -->
+    <div id="tour-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <StatCard title="Total de Posts"    value={posts.length}      icon="📝" link="/admin/posts"      />
+        <StatCard title="Posts Publicados"  value={publishedPosts.length} icon="✅" link="/admin/posts"  />
+        <StatCard title="Rascunhos"         value={draftPosts}        icon="📄" link="/admin/posts"      />
+        <StatCard title="Autores"           value={authors.length}    icon="👤" link="/admin/authors"    />
+    </div>
+
+    <!-- Grid principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <RecentPosts posts={posts} />
+        </div>
+
+        <!-- Ações rápidas -->
+        <div id="tour-quick-actions" class="admin-card p-6">
+            <h3 class="text-base font-heading font-bold text-[#e5e5e5] mb-4">⚡ Ações Rápidas</h3>
+            <div class="space-y-2">
+                <a href="/admin/posts/new"   class="admin-btn admin-btn-primary  text-sm w-full justify-center">+ Novo Post</a>
+                <a href="/admin/pages"       class="admin-btn admin-btn-ghost    text-sm w-full justify-start">✏️ Editar Páginas</a>
+                <a href="/admin/authors"     class="admin-btn admin-btn-ghost    text-sm w-full justify-start">👤 Gerenciar Autores</a>
+                <a href="/admin/categories"  class="admin-btn admin-btn-ghost    text-sm w-full justify-start">🏷️ Categorias</a>
+                {isAdmin && (
+                    <>
+                        <hr class="border-white/10 my-2" />
+                        <a href="/admin/pixels"    class="admin-btn admin-btn-ghost text-sm w-full justify-start">📡 Pixels & Analytics</a>
+                        <a href="/admin/analytics" class="admin-btn admin-btn-ghost text-sm w-full justify-start">📈 Ver Analytics</a>
+                    </>
+                )}
+                <hr class="border-white/10 my-2" />
+                <a href="/" target="_blank"  class="admin-btn admin-btn-ghost    text-sm w-full justify-start">👁️ Ver Site Público</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status -->
+    <div class="mt-6 admin-card p-5">
+        <div class="flex items-center gap-6 flex-wrap text-sm text-[#a3a3a3]">
+            <span>📝 <strong class="text-white">{posts.length}</strong> posts</span>
+            <span>👤 <strong class="text-white">{authors.length}</strong> autores</span>
+            <span>🏷️ <strong class="text-white">{categories.length}</strong> categorias</span>
+            <span class="ml-auto text-xs text-[#525252]">
+                Role: <span class={isAdmin ? 'text-violet-400' : 'text-sky-400'}>{sessionUser.adminRole}</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Card de Aparência do Site -->
+    <div class="mt-6 admin-card p-5">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-lg" id="appearance-icon">🎨</span>
+                <div>
+                    <div class="text-sm font-semibold text-[#e5e5e5]">Aparência do Site</div>
+                    <div class="text-xs text-[#737373]">Define o tema visual para todos os visitantes</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 p-1 rounded-xl" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);">
+                <button
+                    id="theme-dark-btn"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all"
+                    data-scheme="dark"
+                    title="Tema Escuro"
+                >
+                    🌙 Escuro
+                </button>
+                <button
+                    id="theme-light-btn"
+                    class="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all"
+                    data-scheme="light"
+                    title="Tema Claro"
+                >
+                    ☀️ Claro
+                </button>
+            </div>
+
+            <span id="appearance-status" class="text-xs text-[#525252] hidden">Salvando...</span>
+        </div>
+    </div>
+
+    <!-- Status de Configuração -->
+    <ConfigStatus />
+</AdminLayout>
+
+<script is:inline>
+/* ── Aparência do Site ─────────────────────────────────────────── */
+(function () {
+    var darkBtn   = document.getElementById('theme-dark-btn');
+    var lightBtn  = document.getElementById('theme-light-btn');
+    var statusEl  = document.getElementById('appearance-status');
+    var current   = 'dark';
+
+    function applyActiveStyle(scheme) {
+        var active   = scheme === 'dark' ? darkBtn  : lightBtn;
+        var inactive = scheme === 'dark' ? lightBtn : darkBtn;
+        if (!active || !inactive) return;
+        active.style.background  = 'rgba(168,85,247,0.25)';
+        active.style.color       = '#c084fc';
+        active.style.border      = '1px solid rgba(168,85,247,0.4)';
+        inactive.style.background = 'transparent';
+        inactive.style.color      = '#a3a3a3';
+        inactive.style.border     = '1px solid transparent';
+    }
+
+    function setScheme(scheme) {
+        if (scheme === current) return;
+        current = scheme;
+        applyActiveStyle(scheme);
+        if (statusEl) { statusEl.textContent = 'Salvando...'; statusEl.classList.remove('hidden'); }
+
+        fetch('/api/admin/site-settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ colorScheme: scheme }),
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (statusEl) {
+                statusEl.textContent = data.success ? '✅ Salvo! O site será reconstruído em instantes.' : '❌ Erro ao salvar';
+                statusEl.classList.remove('hidden');
+                setTimeout(function () { statusEl.classList.add('hidden'); }, 4000);
+            }
+        })
+        .catch(function () {
+            if (statusEl) { statusEl.textContent = '❌ Erro de rede'; statusEl.classList.remove('hidden'); }
+        });
+    }
+
+    /* Carregar estado atual */
+    fetch('/api/admin/site-settings')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            var scheme = (data.data && data.data.colorScheme) || 'dark';
+            current = scheme;
+            applyActiveStyle(scheme);
+        })
+        .catch(function () { applyActiveStyle('dark'); });
+
+    if (darkBtn)  darkBtn.addEventListener('click',  function () { setScheme('dark'); });
+    if (lightBtn) lightBtn.addEventListener('click', function () { setScheme('light'); });
+})();
+</script>
+
+<script is:inline>
+/* ── Versão do Template ────────────────────────────────────────── */
+(function () {
+    var badgeIcon    = document.getElementById('version-badge-icon');
+    var badgeText    = document.getElementById('version-badge-text');
+    var badge        = document.getElementById('version-badge');
+    var banner       = document.getElementById('version-update-banner');
+    var bannerTitle  = document.getElementById('update-banner-title');
+    var bannerSub    = document.getElementById('update-banner-subtitle');
+    var changelog    = document.getElementById('update-banner-changelog');
+    var updateBtn    = document.getElementById('version-update-btn');
+    var statusWrap   = document.getElementById('version-update-status');
+    var statusInner  = document.getElementById('version-update-status-inner');
+
+    fetch('/api/admin/version')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.upToDate) {
+                if (badgeIcon) badgeIcon.textContent = '✅';
+                if (badgeText) {
+                    badgeText.textContent = 'v' + data.installed + ' — atualizado';
+                    badgeText.style.color = '#6b7280';
+                }
+            } else {
+                /* ── Badge no título ── */
+                if (badgeIcon) badgeIcon.textContent = '🔔';
+                if (badgeText) {
+                    badgeText.textContent = 'v' + data.installed + ' → v' + data.latest;
+                    badgeText.style.color = '#fbbf24';
+                    badgeText.style.fontWeight = '600';
+                }
+                if (badge) {
+                    badge.style.borderColor = 'rgba(234,179,8,0.35)';
+                    badge.style.background  = 'rgba(234,179,8,0.08)';
+                }
+
+                /* ── Banner de atualização ── */
+                if (bannerTitle) bannerTitle.textContent = '🔔 Nova versão disponível: v' + data.installed + ' → v' + data.latest;
+                if (banner) banner.classList.remove('hidden');
+
+                if (changelog && data.changelog) {
+                    changelog.href = data.changelog;
+                    changelog.classList.remove('hidden');
+                }
+            }
+        })
+        .catch(function () {
+            if (badgeIcon) badgeIcon.textContent = '❓';
+            if (badgeText) badgeText.textContent  = 'versão desconhecida';
+        });
+
+    /* ── Botão Aplicar agora ───────────────────────────── */
+    if (updateBtn) {
+        updateBtn.addEventListener('click', function () {
+            updateBtn.disabled      = true;
+            updateBtn.innerHTML     = '⏳ Iniciando...';
+            updateBtn.style.opacity = '0.6';
+            updateBtn.style.cursor  = 'not-allowed';
+
+            fetch('/api/admin/version/update', { method: 'POST' })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (statusWrap)  statusWrap.classList.remove('hidden');
+                    if (res.success) {
+                        if (statusInner) {
+                            statusInner.style.background = 'rgba(74,222,128,0.08)';
+                            statusInner.style.border     = '1px solid rgba(74,222,128,0.2)';
+                            statusInner.style.color      = '#86efac';
+                            statusInner.textContent      = '✅ ' + res.message;
+                        }
+                        if (updateBtn)   updateBtn.classList.add('hidden');
+                        if (bannerTitle) bannerTitle.textContent = '⏳ Atualização em andamento...';
+                        if (bannerSub)   bannerSub.textContent   = 'Aguarde ~2 minutos. O site será reconstruído automaticamente.';
+                        if (badgeIcon)   badgeIcon.textContent   = '⏳';
+                        if (badgeText)   badgeText.textContent   = 'atualizando...';
+                    } else {
+                        if (statusInner) {
+                            statusInner.style.background = 'rgba(239,68,68,0.08)';
+                            statusInner.style.border     = '1px solid rgba(239,68,68,0.2)';
+                            statusInner.style.color      = '#fca5a5';
+                            statusInner.textContent      = '❌ ' + (res.error || 'Erro desconhecido.');
+                        }
+                        updateBtn.disabled      = false;
+                        updateBtn.innerHTML     = '🔄 Tentar novamente';
+                        updateBtn.style.opacity = '1';
+                        updateBtn.style.cursor  = 'pointer';
+                    }
+                })
+                .catch(function () {
+                    if (statusWrap)  statusWrap.classList.remove('hidden');
+                    if (statusInner) {
+                        statusInner.style.background = 'rgba(239,68,68,0.08)';
+                        statusInner.style.border     = '1px solid rgba(239,68,68,0.2)';
+                        statusInner.style.color      = '#fca5a5';
+                        statusInner.textContent      = '❌ Erro de rede. Tente novamente.';
+                    }
+                    updateBtn.disabled      = false;
+                    updateBtn.innerHTML     = '🔄 Tentar novamente';
+                    updateBtn.style.opacity = '1';
+                    updateBtn.style.cursor  = 'pointer';
+                });
+        });
+    }
+})();
+</script>

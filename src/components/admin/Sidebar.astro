@@ -1,0 +1,91 @@
+---
+/**
+ * Sidebar.astro
+ *
+ * Barra lateral de navegação do painel admin.
+ * Usa variáveis CSS do sistema de temas (dark/light) para todas as cores.
+ */
+
+interface Props {
+    user?: { slug: string; name: string; adminRole: 'admin' | 'editor' } | undefined;
+}
+
+const { user } = Astro.props;
+const p       = Astro.url.pathname;
+const isAdmin = user?.adminRole === 'admin';
+
+const active = (href: string) =>
+    href === '/admin'
+        ? p === '/admin'
+        : p === href || p.startsWith(href + '/');
+
+const menuItems = [
+    { label: 'Dashboard',          icon: '📊', href: '/admin'                 },
+    { label: 'Posts',              icon: '📝', href: '/admin/posts'            },
+    { label: 'Autores',            icon: '👤', href: '/admin/authors'          },
+    { label: 'Categorias',         icon: '🏷️', href: '/admin/categories'       },
+    { label: 'Mídia',              icon: '📷', href: '/admin/media'            },
+    { label: 'Páginas',            icon: '⚙️', href: '/admin/pages'            },
+    ...(isAdmin ? [
+        { label: 'Analytics',          icon: '📈', href: '/admin/analytics'       },
+        { label: 'Pixels',             icon: '📡', href: '/admin/pixels'          },
+        { label: 'Importar WordPress', icon: '📥', href: '/admin/import/wordpress'},
+        { label: 'Criar Tema com IA',  icon: '🎨', href: '/admin/criar-tema'      },
+    ] : []),
+];
+---
+
+<aside
+    id="tour-sidebar"
+    class="w-64 flex flex-col"
+    style="background: var(--admin-surface); border-right: 1px solid var(--admin-border);"
+>
+    <!-- Logo/Brand -->
+    <div class="p-6" style="border-bottom: 1px solid var(--admin-border);">
+        <a href="/" class="flex items-center gap-3 group">
+            <div
+                class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-lg transition-colors"
+                style="background: var(--admin-logo-bg); border: 1px solid var(--admin-border); color: var(--admin-text);"
+            >
+                CNX
+            </div>
+            <div>
+                <h1 class="font-heading font-bold text-base leading-tight" style="color: var(--admin-text);">CNX Agency</h1>
+                <p class="text-[10px] uppercase tracking-wider" style="color: var(--admin-text-subtle);">Admin</p>
+            </div>
+        </a>
+    </div>
+
+    <!-- Navigation -->
+    <nav id="tour-nav" class="flex-1 p-3 space-y-1 overflow-y-auto">
+        {menuItems.map((item) => {
+            const tourId =
+                item.href === '/admin/posts'    ? 'tour-posts-link'   :
+                item.href === '/admin/authors'  ? 'tour-authors-link' :
+                item.href === '/admin/pages'    ? 'tour-pages-link'   : undefined;
+            return (
+                <a
+                    href={item.href}
+                    id={tourId}
+                    class={`admin-sidebar-item ${active(item.href) ? 'active' : ''}`}
+                >
+                    <span class="text-lg">{item.icon}</span>
+                    <span class="font-medium text-sm flex-1">{item.label}</span>
+                </a>
+            );
+        })}
+    </nav>
+
+    <!-- Footer -->
+    <div class="p-3 space-y-1" style="border-top: 1px solid var(--admin-border);">
+        <a
+            id="tour-view-site"
+            href="/"
+            target="_blank"
+            class="admin-sidebar-item"
+        >
+            <span>👁️</span>
+            <span class="text-sm">Ver Site</span>
+        </a>
+    </div>
+</aside>

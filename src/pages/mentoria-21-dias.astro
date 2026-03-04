@@ -1,0 +1,308 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { Image } from 'astro:assets';
+import paulaPhoto from '../assets/images/paula.jpg';
+
+// SEO Metadata for the Sales Page
+const pageTitle = "Mentoria 21 Dias: O Despertar da Imaginação | Soberania Quântica";
+const pageDescription = "Domine a Lei da Suposição em 21 dias. Aprenda a técnica exata de Neville Goddard para sair da escassez e viver no estado do desejo já realizado.";
+---
+
+<MainLayout title={pageTitle} description={pageDescription}>
+    
+    <!-- 1. HERO / HEADLINE -->
+    <section class="relative min-h-[90vh] flex items-center justify-center pt-32 pb-20 overflow-hidden bg-[#050505]">
+        <!-- Background Effects -->
+        <div class="absolute inset-0">
+            <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at center, rgba(168, 85, 247, 0.4) 0%, transparent 60%);"></div>
+            <div class="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[150px] animate-pulse" style="animation-delay: 2s;"></div>
+        </div>
+        
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="inline-flex items-center gap-2 px-6 py-2 mb-8 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-md">
+                    <span class="text-sm font-bold text-primary tracking-widest uppercase">Mentoria Premium de 21 Dias</span>
+                </div>
+                
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-heading font-black text-white leading-[1.1] mb-8 drop-shadow-lg">
+                    E se você pudesse manifestar a realidade dos seus sonhos apenas <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">mudando o que você sente agora?</span>
+                </h1>
+                
+                <p class="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto mb-12 leading-relaxed font-light">
+                    Domine a <strong>Lei da Suposição em 21 dias</strong>. Aprenda a técnica exata de Neville Goddard para sair da escassez e viver no estado do desejo já realizado.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
+                    <a href="#oferta" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 sm:px-10 py-5 bg-gradient-to-r from-primary to-secondary text-white text-base sm:text-lg font-bold rounded-2xl hover:scale-105 transition-all shadow-[0_0_40px_rgba(168,85,247,0.4)]">
+                        QUERO MUDAR MINHA REALIDADE AGORA
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                    </a>
+                </div>
+                <!-- Trust Badges -->
+                <div class="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-500 font-medium tracking-wide">
+                    <span class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> Vagas Limitadas</span>
+                    <span class="flex items-center gap-2"><svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg> Garantia de 7 Dias</span>
+                </div>
+                
+                <!-- Scroll Indicator -->
+                <div class="mt-16 animate-bounce flex justify-center">
+                    <a href="#problema" class="text-slate-500 hover:text-primary transition-colors" aria-label="Rolar para baixo">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. O PROBLEMA (A DOR) -->
+    <section id="problema" class="py-24 bg-black relative border-t border-white/5">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl md:text-5xl font-heading font-black text-white mb-10 text-center leading-tight">
+                    Você sente que, por mais que se esforce, <span class="text-red-400">a sua vida parece travada?</span>
+                </h2>
+                
+                <p class="text-xl text-slate-300 mb-10 text-center">
+                    Você estuda, faz afirmações, tenta pensar positivo, mas o "mundo real" insiste em te mostrar exatamente o contrário do que você deseja?
+                </p>
+                
+                <div class="grid md:grid-cols-2 gap-6 mb-12">
+                    <div class="bg-white/5 border border-red-500/20 rounded-2xl p-8 flex gap-4">
+                        <div class="text-red-400 mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        </div>
+                        <p class="text-slate-300 text-lg">Você sofre com a <strong>ansiedade do "quando"</strong> as coisas vão acontecer?</p>
+                    </div>
+                    <div class="bg-white/5 border border-red-500/20 rounded-2xl p-8 flex gap-4">
+                        <div class="text-red-400 mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        </div>
+                        <p class="text-slate-300 text-lg">Sua mente é um <strong>caos de pensamentos negativos</strong> e cenários catastróficos?</p>
+                    </div>
+                    <div class="bg-white/5 border border-red-500/20 rounded-2xl p-8 flex gap-4 md:col-span-2">
+                        <div class="text-red-400 mt-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        </div>
+                        <p class="text-slate-300 text-lg">Você sente que é <strong>refém das circunstâncias externas</strong>, como se o universo decidisse por você?</p>
+                    </div>
+                </div>
+                
+                <div class="bg-primary/10 border border-primary/30 rounded-2xl p-8 text-center">
+                    <p class="text-2xl text-white font-serif italic">
+                        "O erro não está no seu esforço. <br/><span class="text-primary font-bold">O erro está na sua dieta mental.</span>"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. A SOLUÇÃO -->
+    <section class="py-24 bg-[#0a0a0a] relative overflow-hidden">
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <span class="text-primary text-xl font-bold tracking-widest uppercase mb-4 block">A Solução Definitiva</span>
+                <h2 class="text-4xl md:text-5xl font-heading font-black text-white mb-8">
+                    Mentoria 21 Dias: <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">O Despertar da Imaginação</span>
+                </h2>
+                
+                <p class="text-xl text-slate-300 leading-relaxed mb-12">
+                    Um acompanhamento intensivo via WhatsApp, onde eu vou te guiar passo a passo pela metodologia de Neville Goddard. <strong class="text-white">Não é sobre "tentar", é sobre assumir.</strong>
+                </p>
+            </div>
+            
+            <!-- 4. O QUE ELES VÃO RECEBER -->
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <!-- Entrega 1 -->
+                <div class="bg-white/5 border border-white/10 p-8 rounded-3xl hover:border-primary/50 transition-all duration-300">
+                    <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 text-3xl">📱</div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Acesso ao Grupo Exclusivo (WhatsApp)</h3>
+                    <p class="text-slate-400">Onde a energia de egrégora acontece e o suporte é diário. Você não estará sozinho nessa jornada de despertar.</p>
+                </div>
+                <!-- Entrega 2 -->
+                <div class="bg-white/5 border border-white/10 p-8 rounded-3xl hover:border-primary/50 transition-all duration-300">
+                    <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 text-3xl">🎧</div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Áudios Diários de Ativação</h3>
+                    <p class="text-slate-400">Instruções curtas e poderosas para começar o dia no estado correto de consciência e blindar sua mente.</p>
+                </div>
+                <!-- Entrega 3 -->
+                <div class="bg-white/5 border border-white/10 p-8 rounded-3xl hover:border-primary/50 transition-all duration-300">
+                    <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 text-3xl">📖</div>
+                    <h3 class="text-2xl font-bold text-white mb-4">E-book Guia de 21 Dias (PDF)</h3>
+                    <p class="text-slate-400">Seu diário de bordo digital completo com exercícios práticos de Scripting, Revisão Diária e Checklists.</p>
+                </div>
+                <!-- Entrega 4 -->
+                <div class="bg-white/5 border border-white/10 p-8 rounded-3xl hover:border-primary/50 transition-all duration-300">
+                    <div class="w-14 h-14 bg-primary/20 rounded-2xl flex items-center justify-center mb-6 text-3xl">🌌</div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Mestria no SATS</h3>
+                    <p class="text-slate-400">O passo a passo definitivo para usar o estado <em>State Akin To Sleep</em> e programar seu subconsciente antes de dormir.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. AUTORIDADE / METODOLOGIA -->
+    <section class="py-24 bg-black border-y border-white/5 relative">
+        <div class="container mx-auto px-6 max-w-5xl">
+            <div class="flex flex-col md:flex-row items-center gap-16">
+                <div class="w-full md:w-1/2">
+                    <div class="aspect-[4/5] rounded-3xl overflow-hidden bg-white/5 border-2 border-primary/20 p-2 relative">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10"></div>
+                        <div class="w-full h-full bg-[#111]">
+                            <Image 
+                                src={paulaPhoto} 
+                                alt="Paula Franco" 
+                                width={500}
+                                height={625}
+                                class="w-full h-full object-cover"
+                            />
+                        </div>
+                        <div class="absolute bottom-10 left-10 z-20">
+                            <p class="text-white font-bold text-2xl">Paula Franco</p>
+                            <p class="text-primary tracking-widest uppercase text-sm font-bold">Mentora</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2">
+                    <h2 class="text-4xl font-heading font-black text-white mb-6">A Metodologia Mais Pura</h2>
+                    <p class="text-lg text-slate-300 mb-6 leading-relaxed">
+                        Tudo isso é baseado estritamente nos ensinamentos clássicos e puros de <strong>Neville Goddard</strong>, como nas obras <em>"O Sentimento é o Segredo"</em> e <em>"A Fé é a sua Fortuna"</em>.
+                    </p>
+                    <p class="text-lg text-slate-300 mb-8 leading-relaxed">
+                        Sou Paula Franco, mentora de expansão de consciência. Minha missão aqui é traduzir o complexo em prático, sem misticismos ou positividade tóxica. Vamos aplicar a <strong>Lei da Suposição</strong> de forma direta, onde a sua Consciência é a única realidade.
+                    </p>
+                    <ul class="space-y-4 text-slate-300">
+                        <li class="flex items-center gap-3">
+                            <span class="text-primary">✓</span> Aprenda a ignorar a evidência dos sentidos
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="text-primary">✓</span> Assuma a naturalidade do desejo realizado
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="text-primary">✓</span> Torne-se a versão de si que já possui o que quer
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. PROVA SOCIAL -->
+    <section class="py-24 bg-[#050505]">
+        <div class="container mx-auto px-6 max-w-4xl text-center">
+            <h2 class="text-3xl font-heading font-black text-white mb-12">O que acontece quando você aplica o método?</h2>
+            
+            <div class="bg-gradient-to-br from-white/5 to-white/0 border border-white/10 p-10 md:p-16 rounded-3xl relative">
+                <div class="absolute top-8 left-8 text-primary/30 text-7xl font-serif">"</div>
+                <p class="text-xl md:text-2xl text-slate-200 leading-relaxed italic relative z-10 font-light mb-8 pt-4">
+                    Em 15 dias de mentoria, minha percepção mudou drasticamente e as portas que estavam fechadas há meses começaram a se abrir de forma natural. É como se eu finalmente estivesse no controle.
+                </p>
+                <div class="flex items-center justify-center gap-4">
+                    <div class="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary font-bold">AL</div>
+                    <div class="text-left">
+                        <p class="text-white font-bold">Aluna da Mentoria</p>
+                        <div class="flex text-yellow-500 text-sm">★★★★★</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. OFERTA E VALOR -->
+    <section id="oferta" class="py-24 bg-[#0a0a0a] border-t border-primary/20 relative overflow-hidden">
+        <!-- Glow -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div class="container mx-auto px-4 sm:px-6 relative z-10">
+            <div class="max-w-3xl mx-auto bg-black border border-primary/40 rounded-3xl md:rounded-[2.5rem] p-6 sm:p-10 md:p-16 text-center shadow-[0_0_80px_rgba(168,85,247,0.15)]">
+                <h2 class="text-3xl md:text-5xl font-heading font-black text-white mb-6">Sua Nova Realidade Começa Aqui</h2>
+                
+                <p class="text-xl text-slate-400 mb-8">
+                    Quanto vale reprogramar a sua mente e parar de sofrer pelas circunstâncias externas para o resto da vida?
+                </p>
+                
+                <div class="bg-white/5 p-6 rounded-2xl mb-8 flex flex-col gap-2 line-through text-slate-500">
+                    <p>Uma consultoria individual custaria R$ 1.500,00</p>
+                </div>
+                
+                <p class="text-lg text-white mb-4">Mas nesta turma de 21 dias, você terá acesso a tudo por apenas:</p>
+                
+                <div class="mb-4">
+                    <span class="text-xl md:text-2xl text-slate-400 font-bold">12x de</span><br/>
+                    <span class="text-5xl sm:text-6xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary ml-2 tracking-tighter">R$ 29,90</span>
+                </div>
+                <p class="text-slate-400 mb-10 text-lg">ou R$ 297,00 à vista</p>
+                
+                <a href="#" class="block w-full py-5 md:py-6 px-6 md:px-10 bg-gradient-to-r from-primary to-secondary text-white text-lg md:text-xl font-bold rounded-2xl hover:scale-105 transition-all shadow-[0_20px_40px_-10px_rgba(168,85,247,0.5)] mb-6">
+                    QUERO GARANTIR MINHA VAGA AGORA
+                </a>
+                
+                <!-- 8. GARANTIA -->
+                <div class="flex items-center justify-center gap-4 text-emerald-400 bg-emerald-400/10 p-4 rounded-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <div class="text-left">
+                        <p class="font-bold text-sm md:text-base">Garantia Incondicional de 7 Dias</p>
+                        <p class="text-xs text-emerald-400/80">O risco é todo meu. Se não gostar, devolvo 100%.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. FAQ -->
+    <section class="py-24 bg-black border-t border-white/5 pb-32 md:pb-24">
+        <div class="container mx-auto px-6 max-w-3xl">
+            <h2 class="text-3xl md:text-4xl font-heading font-black text-white mb-12 text-center">Dúvidas Comuns</h2>
+            
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <details class="bg-white/5 border border-white/10 rounded-2xl group overflow-hidden">
+                    <summary class="p-6 cursor-pointer text-xl font-bold text-white flex items-center justify-between outline-none">
+                        <span class="flex items-center gap-3"><span class="text-primary">Q.</span> Preciso de muito tempo por dia?</span>
+                        <svg class="w-6 h-6 text-slate-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-6 pb-6 pt-0">
+                        <p class="text-slate-400 pl-8">
+                            Não, 15 a 20 minutos diários são mais do que suficientes para seguir o plano, ouvir o áudio e fazer as atividades daquele dia.
+                        </p>
+                    </div>
+                </details>
+                
+                <!-- FAQ Item 2 -->
+                <details class="bg-white/5 border border-white/10 rounded-2xl group overflow-hidden">
+                    <summary class="p-6 cursor-pointer text-xl font-bold text-white flex items-center justify-between outline-none">
+                        <span class="flex items-center gap-3"><span class="text-primary">Q.</span> O grupo de WhatsApp fica aberto o dia todo?</span>
+                        <svg class="w-6 h-6 text-slate-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-6 pb-6 pt-0">
+                        <p class="text-slate-400 pl-8">
+                            Sim, porém em horários específicos para interação, assim garantimos a ordem, foco e que a egrégora fique mantida em alta vibração sem ser invasivo.
+                        </p>
+                    </div>
+                </details>
+                
+                <!-- FAQ Item 3 -->
+                <details class="bg-white/5 border border-white/10 rounded-2xl group overflow-hidden">
+                    <summary class="p-6 cursor-pointer text-xl font-bold text-white flex items-center justify-between outline-none">
+                        <span class="flex items-center gap-3"><span class="text-primary">Q.</span> As aulas são em vídeo e ao vivo?</span>
+                        <svg class="w-6 h-6 text-slate-400 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-6 pb-6 pt-0">
+                        <p class="text-slate-400 pl-8">
+                            A mentoria foca em praticidade. Os conteúdos são direcionamentos ágeis em áudio e texto enviados diretamente no grupo para você absorver de onde quiser, complementados pelo e-book.
+                        </p>
+                    </div>
+                </details>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Sticky Mobile CTA -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-black/90 backdrop-blur-md border-t border-primary/20 z-50 md:hidden flex justify-center">
+        <a href="#oferta" class="w-full py-4 bg-gradient-to-r from-primary to-secondary text-white text-center font-bold rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.3)] animate-pulse">
+            GARANTIR MINHA VAGA AGORA
+        </a>
+    </div>
+
+</MainLayout>

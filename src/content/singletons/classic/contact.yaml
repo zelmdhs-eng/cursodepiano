@@ -1,0 +1,18 @@
+heroTitle: Entre em Contato
+heroSubtitle: Tem uma dúvida, sugestão ou quer trocar uma ideia? Manda uma mensagem — respondo todos os contatos.
+email: contato@paulafranco.com.br
+phone: 11 91550-6568
+address: |-
+  São Paulo, SP
+  Brasil
+socialLinks:
+  - platform: Instagram
+    url: https://www.instagram.com/soberania_quantica
+    icon: 📸
+  - platform: YouTube
+    url: https://www.youtube.com/@soberania_quantica
+    icon: 🎥
+formTitle: Envie sua Mensagem
+formSubmitText: Enviar Mensagem
+formSuccessMessage: Mensagem enviada com sucesso! Entrarei em contato em breve. Obrigado!
+ctaTitle: Vamos conversar?

@@ -1,0 +1,148 @@
+# sync-cnx.yml
+#
+# GitHub Action que verifica se há atualizações disponíveis no template CNX
+# e abre automaticamente um Pull Request com as melhorias.
+#
+# COMO FUNCIONA:
+#   - Roda automaticamente toda segunda-feira às 9h (horário de Brasília)
+#   - Pode ser executado manualmente a qualquer momento pela aba "Actions" no GitHub
+#   - Baixa apenas os arquivos de CÓDIGO do template (nunca toca no seu conteúdo)
+#   - Se houver novidades, abre um PR para você revisar e dar Merge
+#
+# ARQUIVOS QUE NUNCA SÃO ALTERADOS:
+#   - src/content/  (seus posts, autores, categorias, páginas)
+#   - public/images (suas imagens enviadas pelo painel)
+
+name: 🔄 Atualizar Template CNX
+
+on:
+  # Disparo manual pela aba "Actions" no GitHub
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Forçar atualização mesmo sem mudanças detectadas?'
+        required: false
+        default: 'false'
+        type: boolean
+
+  # Verificação automática toda segunda-feira às 12h UTC (9h Brasília)
+  schedule:
+    - cron: '0 12 * * 1'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Verificar e aplicar atualizações
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Baixar repositório
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔗 Conectar ao template CNX original
+        run: |
+          git remote add template https://github.com/8linksapp-maker/cnx.git 2>/dev/null \
+            || git remote set-url template https://github.com/8linksapp-maker/cnx.git
+          git fetch template main --no-tags --quiet
+          echo "✅ Template CNX carregado com sucesso."
+
+      - name: 📦 Aplicar arquivos de código atualizados
+        id: changes
+        run: |
+          # Copia apenas os arquivos de CÓDIGO do template
+          # O conteúdo do aluno (src/content/ e public/images/) NÃO é tocado
+          git checkout template/main -- \
+            src/components/ \
+            src/layouts/ \
+            src/pages/ \
+            src/styles/ \
+            src/themes/ \
+            src/utils/ \
+            src/middleware.ts \
+            src/env.d.ts \
+            astro.config.mjs \
+            tailwind.config.mjs \
+            tsconfig.json \
+            package.json \
+            bun.lock \
+            public/favicon.ico \
+            public/favicon.svg \
+            VERSION \
+            CHANGELOG.md \
+            2>/dev/null || true
+
+          # Verifica se houve mudanças reais
+          if git diff --staged --quiet && [ "${{ inputs.force }}" != "true" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "✅ Seu site já está na versão mais recente — nenhuma PR necessária."
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "📦 Atualizações encontradas nos seguintes arquivos:"
+            git diff --staged --name-only || echo "(nenhuma mudança staged)"
+          fi
+
+      - name: 📋 Obter nova versão
+        if: steps.changes.outputs.has_changes == 'true'
+        id: version
+        run: |
+          NEW_VERSION=$(cat VERSION 2>/dev/null || echo "nova versão")
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: 🚀 Criar Pull Request com as atualizações
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        id: create_pr
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: cnx-atualizacao
+          base: main
+          delete-branch: false
+          title: '🔄 Atualização CNX v${{ steps.version.outputs.new_version }} disponível'
+          body: |
+            ## 🔄 Atualização do Template CNX — v${{ steps.version.outputs.new_version }}
+
+            Há melhorias e correções disponíveis no template.
+
+            > ✅ **Seu conteúdo (posts, páginas, imagens) não será alterado.**
+
+            📋 [Ver o que mudou nesta versão](https://github.com/8linksapp-maker/cnx/blob/main/CHANGELOG.md)
+
+            ---
+
+            ### Como aplicar em 2 cliques:
+
+            1. Clique no botão verde **"Merge pull request"** abaixo
+            2. Clique em **"Confirm merge"**
+            3. Aguarde ~2 minutos — seu site será reconstruído automaticamente ✅
+
+            ---
+
+            > Dúvidas? Entre em contato com o suporte do curso.
+          labels: 'atualização'
+          commit-message: 'chore: sync com template cnx v${{ steps.version.outputs.new_version }}'
+          author: 'CNX Updates <noreply@cnx.app>'
+
+      - name: 🔀 Aplicar atualização automaticamente
+        if: steps.changes.outputs.has_changes == 'true' && steps.create_pr.outputs.pull-request-number != ''
+        run: |
+          PR_NUMBER="${{ steps.create_pr.outputs.pull-request-number }}"
+          echo "🔀 Aplicando PR #${PR_NUMBER} automaticamente..."
+          gh pr merge "${PR_NUMBER}" --merge --auto --delete-branch \
+            --body "✅ Aplicado automaticamente pelo CNX Updater" \
+            || echo "⚠️ Auto-merge não disponível agora — o PR permanece aberto para revisão manual."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ✅ Resumo
+        run: |
+          if [ "${{ steps.changes.outputs.has_changes }}" == "true" ]; then
+            echo "🚀 Atualização aplicada automaticamente. A Vercel reconstruirá o site em ~1 min."
+          else
+            echo "✅ Nenhuma atualização disponível no momento."
+          fi

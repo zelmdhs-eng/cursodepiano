@@ -1,0 +1,6 @@
+name: "Classic Agency"
+slug: "classic"
+primaryColor: "#7c3AED"
+secondaryColor: "#eab308"
+borderRadius: "16px"
+layout: "classic"

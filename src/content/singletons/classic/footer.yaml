@@ -1,0 +1,26 @@
+copyright: © 2026 Soberania Quântica. Todos os direitos reservados.
+description: Alinhando mente e coração para transformar sua realidade. Física Quântica e Metafísica com Paula Franco.
+columns:
+  - title: Navegação
+    links:
+      - label: Home
+        href: /
+      - label: Blog
+        href: /blog
+      - label: Sobre
+        href: /sobre
+      - label: Contato
+        href: /contato
+  - title: Legal
+    links:
+      - label: Política de Privacidade
+        href: /privacidade
+      - label: Termos de Uso
+        href: /termos
+socialLinks:
+  - platform: Instagram
+    url: https://www.instagram.com/soberania_quantica
+    icon: 📸
+  - platform: YouTube
+    url: https://www.youtube.com/@soberania_quantica
+    icon: 🎥

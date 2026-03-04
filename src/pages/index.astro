@@ -1,0 +1,23 @@
+---
+import { getCollection } from 'astro:content';
+import { readSingleton } from '../utils/singleton-utils';
+import HomeTemplate from '../themes/classic/Home.astro';
+
+const home = await readSingleton('home', 'classic') || {};
+
+const allPosts = await getCollection('posts');
+const latestPosts = allPosts
+    .filter(post => post.data.publishedDate)
+    .sort((a, b) => {
+        const dateA = new Date(a.data.publishedDate || 0).getTime();
+        const dateB = new Date(b.data.publishedDate || 0).getTime();
+        return dateB - dateA;
+    })
+    .slice(0, 9);
+---
+
+<HomeTemplate 
+    homeData={home}
+    themeId="classic"
+    latestPosts={latestPosts}
+/>
