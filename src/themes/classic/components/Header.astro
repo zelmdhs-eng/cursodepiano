@@ -28,12 +28,11 @@ if (!menuData || !menuItems || menuItems.length === 0) {
     <nav class="container mx-auto px-6 h-20 flex items-center justify-between">
         <a href="/" class="hover:opacity-80 transition-all flex items-center gap-3">
             {logoType === 'image' && logoImage ? (
-                <Image
-                    src={logoLocal}
+                <img
+                    src={logoImage}
                     alt={logoText || "Logo do Site"}
-                    width={120}
-                    quality="max"
-                    class="h-8 md:h-10 w-auto object-contain"
+                    width="140"
+                    class="h-10 md:h-12 w-auto object-contain"
                     loading="eager"
                 />
             ) : (
