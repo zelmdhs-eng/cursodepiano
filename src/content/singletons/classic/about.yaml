@@ -1,27 +1,27 @@
-heroTitle: Você atrai o que você é
-heroSubtitle: Essa frase não é apenas um lema para este blog é o fundamento de cada mudança que vivi e que agora ajudo você a trilhar.
-missionTitle: Da Transição à Consciência
-missionDescription: Minha caminhada envolveu uma quebra profunda de paradigmas. Vinda de uma vivência religiosa tradicional evangélica, precisei desaprender para verdadeiramente despertar. Ao mergulhar nos estudos da Física Quântica e da Metafísica, compreendi que a realidade que eu enxergava era apenas um reflexo da frequência que eu emitia.
-visionTitle: Nosso Manifesto
-visionDescription: Acreditamos que ninguém é vítima das circunstâncias. Somos todos arquitetos da nossa própria frequência vibracional. Mudar a sua vida não é um milagre externo; é uma escolha consciente de quem decide ser o soberano de sua própria existência.
-valuesTitle: O Que é a Soberania Quântica?
+heroTitle: A Música está em Você
+heroSubtitle: Nossa missão não é ensinar notas soltas, é destravar a linguagem dos acordes para que você toque as músicas que mais ama nas primeiras semanas.
+missionTitle: Da Teoria Massante à Prática
+missionDescription: A maioria das escolas de música faz o aluno passar anos travado na teoria antes de tocar a primeira música popular. Nossa jornada envolveu inverter esse processo — o Método Direto ao Ponto foi desenhado para quem tem pressa e quer ver resultado saindo do teclado imediatamente.
+visionTitle: Nosso Manifesto Musical
+visionDescription: Acreditamos que o talento não é um dom divino que nasce com poucos; ele é o resultado da paixão combinada com o método certo. Você não está velho demais e nem precisa de "mãos de pianista" para emocionar as pessoas ao seu redor.
+valuesTitle: O Que é o Método Direto ao Ponto?
 values:
-  - icon: ❇️
-    title: Elevação Vibracional
-    description: Elevar sua vibração através de pequenas e constantes ações baseadas na gratidão genuína.
-  - icon: 🔬
-    title: Base Científica
-    description: Entender a ciência por trás da manifestação e de como seus sentimentos afetam sua realidade material física.
-  - icon: 🛠️
-    title: Prática Diária
-    description: Utilizar ferramentas práticas e rotinas para assumir, de uma vez por todas, o comando da sua realidade.
-teamTitle: Quem sou eu
+  - icon: 🎹
+    title: Acordes e Padrões
+    description: Focamos no padrão das músicas populares, ignorando a leitura de partituras complexas no início.
+  - icon: 🎼
+    title: Repertório Personalizado
+    description: O aluno é engajado porque aprende usando as músicas que ele próprio escolhe e ama ouvir.
+  - icon: 🚀
+    title: Resultado Rápido
+    description: Com nosso cronograma, alunos iniciantes costumam tocar a primeira música já na quarta aula prática.
+teamTitle: Quem está por trás
 teamMembers:
-  - name: Paula Franco
-    role: Mentora de Física Quântica e Metafísica
-    bio: Por muito tempo vivi seguindo padrões que não me pertenciam, buscando respostas no mundo externo, enquanto o Universo esperava que eu olhasse para dentro. Hoje, ajudo milhares de mentes despertas a atingirem a maestria sobre a própria vida.
-    photo: /paula-sobre.jpeg
-ctaTitle: Vamos despertar juntos?
-ctaDescription: Se você está cansada de se sentir frustrada e quer entender como mudar sua realidade de verdade, te convido a fazer parte da nossa comunidade.
-ctaButtonText: Acompanhar no Instagram
-ctaButtonUrl: https://www.instagram.com/soberania_quantica
+  - name: Professor de Piano
+    role: Criador do Método "Direto ao Ponto"
+    bio: Após sofrer com métodos engessados por anos, decidi compilar apenas os atalhos e os padrões harmônicos que realmente importam no teclado. Hoje ajudo milhares de adultos que achavam que não tinham "o dom" a destravar nas teclas.
+    photo: /images/author-fallback.jpg
+ctaTitle: Vamos Tocar Sua Primeira Música?
+ctaDescription: Se você quer entender de forma prática como as notas se conectam, convido você a embarcar na nossa primeira aula sem medo.
+ctaButtonText: Quero Aprender Agora
+ctaButtonUrl: /

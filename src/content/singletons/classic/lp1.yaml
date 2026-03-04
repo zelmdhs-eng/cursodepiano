@@ -1,210 +1,202 @@
-# Landing Page 1 - Dot Com Secrets Format
+# Landing Page 1 - Piano Sales Page Format
 # Estrutura completa editável via CMS
 
 # 1. HERO SECTION
-heroBadge: "🚀 A NOVA ERA DO DESENVOLVIMENTO WEB"
-heroTitleLine1: "Você está perdendo R$ 2.400 por ano em hospedagem WordPress enquanto seu site fica preso na página 2 do Google?"
-heroTitleHighlight: "WORDPRESS ESTÁ COMENDO SEU LUCRO E SABOTANDO SEU SEO"
-heroTitleLine2: ""
+heroBadge: "🎹 APRENDA PIANO EM QUALQUER IDADE"
+heroTitleLine1: "Em qualquer idade podemos aprender,"
+heroTitleHighlight: "Melhorar a qualidade de vida,"
+heroTitleLine2: "ter menos ansiedade e ser mais feliz."
 heroSubtitle: >-
-  Enquanto você paga R$ 200/mês em WordPress, seus concorrentes dominam o Google com hospedagem GRÁTIS e sites 10x mais rápidos. 
-  E você nem sabe por quê.
-  
-  A verdade: WordPress é tecnologia de 2003. O Google mudou. A web mudou. Mas você ainda usa o método antigo.
-heroCtaText: "QUERO DOMINAR O GOOGLE AGORA"
+  Realize o seu sonho de tocar teclado ou piano, mesmo que você esteja começando do absoluto zero. 
+  Um método direto ao ponto, sem pressão e com resultados na 4ª aula.
+heroCtaText: "QUERO COMEÇAR MINHA PRIMEIRA AULA"
 heroCtaUrl: "#oferta"
-heroFeatures: "✅ Performance 10x superior | ✅ SEO otimizado | ✅ Custo zero de hospedagem"
+heroFeatures: "✅ Do Início a Maestria | ✅ Acesso Vitalício | ✅ Tuto Passo a Passo"
 heroImage: null
 
 # 2. O VELHO CAMINHO VS O NOVO CAMINHO
-oldVsNewTitle: "O Velho Caminho vs. O Novo Caminho"
+oldVsNewTitle: "Por que as pessoas desistem de tocar piano?"
 oldVsNewSubtitle: >-
-  Descubra por que 90% dos sites WordPress estão presos na página 2 do Google enquanto uma minoria domina com JAMstack
-oldPathTitle: "O Velho Caminho (WordPress)"
+  Esqueça tudo o que te disseram sobre precisar de um "dom" ou anos de conservatório.
+oldPathTitle: "O Velho Caminho (Tradicional)"
 oldPathItems:
-  - "Sites lentos que o Google penaliza"
-  - "Hospedagem cara que come seu lucro"
-  - "Plugins que quebram e travam seu site"
-  - "Rankeamento que nunca melhora"
-newPathTitle: "O Novo Caminho JAMstack"
+  - "Métodos engessados focados apenas em partitura matemática"
+  - "Anos de estudos teóricos antes de tocar a primeira música"
+  - "Professores que não entendem a rotina de um adulto"
+  - "Pressão e ansiedade para tocar perfeitamente"
+newPathTitle: "O Método Direto ao Ponto"
 newPathItems:
-  - "Sites 10x mais rápidos que o Google premia"
-  - "Hospedagem gratuita na Edge (Cloudflare)"
-  - "Arquitetura moderna que escala infinitamente"
-  - "Rankeamento nas primeiras posições do Google"
+  - "Aprenda tocando as músicas que você ama de verdade"
+  - "Desenvolva a coordenação motora de forma natural e sem estresse"
+  - "Alivie a ansiedade após um dia longo de trabalho com a música"
+  - "Na 4ª aula você já estará tocando a sua primeira canção completa"
 
 # 3. A PONTE DA EPIFANIA
-epiphanyTitle: "O Erro de Anos que me levou ao segredo do ranqueamento máximo."
+epiphanyTitle: "A história de quem achava que já tinha passado do tempo de aprender..."
 epiphanyContent: >-
-  Eu trabalhei com WordPress por anos e sempre vi meus clientes travados na página 2 do Google. 
-  Sites lentos, plugins que quebram, hospedagem cara... Mas eu percebi que o problema não era o conteúdo, era a arquitetura.
+  Eu sempre vi pessoas dizendo: "Ah, eu sou velho demais para aprender um instrumento", ou "Meus dedos são travados e eu não levo jeito".
   
-  Foi quando descobri o JAMstack que tive meu momento "Aha!". Sites estáticos pré-renderizados, 
-  servidos na Edge, com performance que o Google premia.
+  O que a ciência nos mostra e a prática comprova é que tocar piano, depois de adulto, é um dos maiores "remédios" contra a ansiedade, estresse e envelhecimento precoce.
   
-  Naquele momento, eu percebi: o valor não está em usar WordPress, mas em usar a arquitetura certa.
+  Muitos alunos meus aprenderam online, no próprio tempo, muito mais do que aprenderiam suportando 2 anos de aulas presenciais arrastadas.
   
-  Joguei o método antigo fora e criei a Stack JAMstack.
+  Você não precisa ser um prodígio ou uma criança prodígio. Você só precisa da sequência certa de passos. E foi isso que eu estruturei neste curso.
 epiphanyQuote: >-
-  Foi quando descobri o JAMstack que tive meu momento "Aha!". Sites estáticos pré-renderizados, 
-  servidos na Edge, com performance que o Google premia.
+  Ela aprendeu online muito mais do que durante 2 anos de aula presencial. 
+  O Método Direto ao Ponto é O Segredo.
 epiphanyStats:
-  - number: "5+"
+  - number: "25+"
     label: "Anos de Experiência"
     icon: "⏱️"
-  - number: "100+"
-    label: "Sites Criados"
-    icon: "👨‍💻"
+  - number: "50k+"
+    label: "Alunos Formados"
+    icon: "👨‍🏫"
 epiphanyImage: null
 
 # 4. MECANISMO ÚNICO
-mechanismTitle: "Conheça o Sistema JAMstack"
+mechanismTitle: "Como funciona o Método?"
 mechanismItems:
   - number: "01"
-    icon: "⚡"
-    title: "Astro Framework"
+    icon: "🎹"
+    title: "Mão na Massa Imediata"
     description: >-
-      Framework zero-JS por padrão. Sites estáticos pré-renderizados que carregam instantaneamente. 
-      O Google ama isso.
-  - number: "10"
-    icon: "☁️"
-    title: "Cloudflare Edge"
+      Sem ficar meses só em exercícios chatos. O seu cérebro precisa de dopamina (conclusão). 
+      Você vai aprender tocando músicas que te dão prazer e vontade de continuar.
+  - number: "02"
+    icon: "🧠"
+    title: "Coordenação Destravada"
     description: >-
-      Hospedagem gratuita na Edge. Seu site servido em milissegundos de qualquer lugar do mundo. 
-      Zero custo de servidor.
-  - number: "100"
-    icon: "📝"
-    title: "Keystatic CMS"
+      Exercícios práticos que soltam a mão direita e esquerda de forma independente, 
+      com clareza, calma, e no seu próprio ritmo diário.
+  - number: "03"
+    icon: "📱"
+    title: "O Professor com Você"
     description: >-
-      CMS Git-based. Seu conteúdo versionado, seguro e rápido. Sem banco de dados lento. 
-      Performance máxima.
-mechanismFooter: "A tecnologia faz o trabalho duro. Você fica com o ranqueamento e o faturamento."
+      Fale diretamente comigo tirando dúvidas direto pelo WhatsApp. 
+      Você nunca mais vai se sentir sozinho travado naquele compasso difícil.
+mechanismFooter: "O método 'Direto ao Ponto' é o caminho ideal para quem quer aprender com clareza, calma, sem pressão e tocar do clássico ao popular."
 
 # 5. DEMONSTRAÇÃO TÉCNICA
-demoTitle: "O Trabalho de Dias, Feito em Segundos"
+demoTitle: "Você tocando assim..."
 demoDescription: >-
-  Veja como nossa stack transforma um simples comando em um site de alta performance, 
-  pronto para o Google, sem que você precise lutar contra WordPress.
+  Veja abaixo como nossos alunos saem do absoluto zero e chegam na maestria aplicando o método simples.
 demoVideoUrl: ""
 demoImage: null
 demoFeatures:
   - icon: "⚡"
-    title: "Velocidade Absurda"
-    description: "Sites que levariam dias no WordPress são criados em minutos."
-  - icon: "🌐"
-    title: "Otimizado para Google"
-    description: "Performance que o Google Core Web Vitals premia."
+    title: "Resultado Rápido"
+    description: "Você sente a evolução a cada 15 minutos de prática."
+  - icon: "🎵"
+    title: "Repertório Lindo"
+    description: "Toque as músicas que tocam o seu coração e emocione sua família."
 
 # 6. O CAMINHO COMPLETO
-pathTitle: "Sua Jornada para o Topo do Google"
+pathTitle: "A sua jornada musical"
 pathSubtitle: >-
-  Vamos construir juntos um site do zero, passando por cada uma dessas etapas até você ter seu primeiro site ranqueando na primeira página do Google.
+  Tudo o que você vai receber a partir do momento em que acessar o portal de alunos. Do nível 1 ao nível avançado.
 pathSteps:
   - number: "01"
-    icon: "⚡"
-    title: "Setup Inicial"
-    description: "Configure Astro, Cloudflare e Keystatic. A base da sua arquitetura moderna."
+    icon: "🎯"
+    title: "Módulo Zero (O Despertar)"
+    description: "Postura, escolhendo o teclado/piano certo, numeração dos dedos e a sua primeira música em 4 aulas."
   - number: "02"
-    icon: "📝"
-    title: "Conteúdo SEO"
-    description: "Crie conteúdo otimizado com Keystatic. Estrutura que o Google entende e premia."
+    icon: "🎼"
+    title: "Módulo Leitura Fácil"
+    description: "Como ler cifras, partituras simplificadas e entender o ritmo sem sofrimento matemático."
   - number: "03"
-    icon: "☁️"
-    title: "Deploy na Edge"
-    description: "Deploy instantâneo no Cloudflare. Seu site no ar em segundos, servido globalmente."
+    icon: "🎹"
+    title: "Módulo Pop/Clássico e Arpejos"
+    description: "Desenhando acordes bonitos, arpejos fluidos e tocando as grandes canções com ambas as mãos em sincronia."
   - number: "04"
     icon: "🚀"
-    title: "Rankeamento"
-    description: "Veja seu site subir nas primeiras posições do Google. Performance que WordPress nunca vai entregar."
+    title: "Módulo Master"
+    description: "Improvisação emotiva. Como ouvir uma música e tirar de ouvido, e como florir as suas canções e emocionar todos ao redor."
 
 # 7. DEPOIMENTOS/PROVA SOCIAL
-testimonialsTitle: "O Que Nossos Clientes Estão Dizendo"
+testimonialsTitle: "Transformações Reais"
 testimonialsSubtitle: >-
-  Resultados reais de quem migrou do WordPress para JAMstack e viu o ranqueamento melhorar
+  Veja o que os alunos estão achando dessa experiência de aprender do conforto de casa.
 testimonials:
-  - name: "Cliente Satisfeito"
-    role: ""
+  - name: "Helena, 62 anos"
+    role: "Aposentada"
     rating: "★★★★★"
     text: >-
-      "Meu site WordPress estava na página 3 do Google. Migrei para JAMstack e em 2 meses estava na primeira página. Performance incrível!"
+      "Eu tinha o sonho de criança de tocar piano, mas as dores nas mãos e a vergonha me impediam. Em 3 meses com esse curso, minha ansiedade diminuiu e já toquei 'Hallelujah' pro meu neto!"
     image: null
     videoUrl: ""
-  - name: "Empresário Digital"
-    role: ""
+  - name: "Carlos, 34 anos"
+    role: "Advogado"
     rating: "★★★★★"
     text: >-
-      "Zero custo de hospedagem. Site 10x mais rápido. O Google adorou. Por que não fiz isso antes?"
+      "Minha rotina é muito estressante. Chegar em casa e fazer apenas 20 minutos de aula direto na prática tirou todo o peso do meu dia. Método espetacular!"
     image: null
     videoUrl: ""
-  - name: "Desenvolvedor"
-    role: ""
+  - name: "Mariana, 48 anos"
+    role: "Empresária"
     rating: "★★★★★"
     text: >-
-      "WordPress era um pesadelo. Plugins quebrando, site lento, hospedagem cara. JAMstack mudou tudo."
+      "Fiz 2 anos de conservatório e só sabia ler partitura de cor, mas não sabia tocar com alma. Esse método Direto ao Ponto destravou minha emoção no piano. Sou outra pessoa."
     image: null
     videoUrl: ""
 
 # 8. A OFERTA
-offerTitle: "O Que Você Recebe ao Escolher JAMstack"
+offerTitle: "O que você leva hoje"
 offerItems:
-  - title: "Site JAMstack Completo"
-    description: "Astro + Cloudflare + Keystatic configurados e prontos para uso."
-  - title: "Hospedagem Gratuita na Edge"
-    description: "Cloudflare Workers com deploy automático. Zero custo de servidor."
-  - title: "Otimização SEO Avançada"
-    description: "Performance que o Google Core Web Vitals premia. Ranqueamento garantido."
-offerBadge: "⚡ PERFORMANCE 10X SUPERIOR"
-offerPriceTitle: "Comece Agora"
-offerPriceSubtitle: "Migre do WordPress para JAMstack"
-offerCtaText: "QUERO RANQUEAR NO GOOGLE"
-offerCtaUrl: "/contato"
+  - title: "Curso Completo Direto ao Ponto"
+    description: "Acesso total a todos os módulos, do iniciante ao avançado, passo a passo."
+  - title: "Suporte VIP com o Professor"
+    description: "Contato pelo WhatsApp para tirar todas as dúvidas com áudio e vídeo."
+  - title: "Acesso Imediato"
+    description: "Assista no celular, tablet ou computador, a hora que quiser."
+offerBadge: "🎹 PROMOÇÃO EXCLUSIVA HOJE"
+offerPriceTitle: "Acesso Liberado!"
+offerPriceSubtitle: "Liberte o Músico que existe em você."
+offerCtaText: "QUERO ME INSCREVER AGORA"
+offerCtaUrl: "https://seu-link-de-afiliado.com"
 offerStack:
-  - title: "100% Gratuito"
-    description: "Hospedagem e deploy sem custos"
-  - title: "Deploy Imediato"
-    description: "Seu site no ar em minutos"
-  - title: "SEO Garantido"
-    description: "Performance que o Google premia"
+  - title: "Aulas em Vídeo"
+    description: "Qualidade 4K e multi-câmera"
+  - title: "Material em PDF"
+    description: "Exercícios e Cifras prontas"
+  - title: "Pagamento Único"
+    description: "Sem mensalidades chatas"
 offerBonuses:
-  - title: "Bônus 1"
-    description: "Descrição do bônus"
-    icon: "🎁"
+  - title: "Bônus: Repertório Emocionante"
+    description: "Apostila com as 50 músicas mais tocadas para você brilhar na sala de estar."
+    icon: "📖"
 
 # 9. GARANTIA
-guaranteeTitle: "O Risco está 100% nas minhas costas."
+guaranteeTitle: "A Garantia Incondicional de 7 Dias"
 guaranteeText: >-
-  Teste nossa stack JAMstack. Veja a performance, o ranqueamento e a velocidade. 
-  Se você não achar que é superior ao WordPress, eu assumo a responsabilidade. Sem perguntas.
-guaranteeBadge: "Garantia de Performance"
+  Teste o Método Direto Ao Ponto por 7 dias corridos. Se você assistir as aulas, fizer os exercícios e mesmo assim achar que 'tocar piano não é pra você', eu devolvo 100% do seu dinheiro. Você não corre NENHUM risco.
+guaranteeBadge: "Risco Zero"
 
 # 10. FAQ
-faqTitle: "Suas dúvidas respondidas"
+faqTitle: "Perguntas Frequentes"
 faqItems:
-  - question: "Por que JAMstack é melhor que WordPress para SEO?"
+  - question: "Preciso ter um piano de cauda ou serve um teclado simples?"
     answer: >-
-      JAMstack gera sites estáticos pré-renderizados que carregam instantaneamente. O Google Core Web Vitals premia velocidade, 
-      e sites JAMstack consistentemente superam WordPress em performance, resultando em melhor ranqueamento.
-  - question: "Como a hospedagem pode ser gratuita?"
+      Você pode começar com um teclado arranjador ou sensitivo perfeitamente! Não precisa investir num piano caro agora. 
+      Nossas técnicas servem tanto para quem tem um tecladinho simples em casa quanto para quem já tem um piano digital ou acústico.
+  - question: "Sou adulto/idoso, meus dedos não são tão rápidos. É para mim?"
     answer: >-
-      Cloudflare Workers oferece hospedagem gratuita na Edge para sites estáticos. Seu site é servido de servidores distribuídos 
-      globalmente, com zero custo de infraestrutura. WordPress requer servidores caros que você precisa pagar mensalmente.
-  - question: "Preciso saber programar para usar JAMstack?"
+      Completamente. O ensino engessado tradicional cobra precisão técnica matemática. O nosso método ensina o piano como uma ferramenta de relaxamento mental 
+      e qualidade de vida. Os exercícios soltam os dedos lentamente de forma orgânica.
+  - question: "Quando poderei tocar minha primeira música?"
     answer: >-
-      Com Keystatic CMS, você edita conteúdo sem código, igual WordPress. A diferença é que o site gerado é estático e super rápido, 
-      enquanto WordPress precisa de PHP e banco de dados que tornam tudo lento.
-  - question: "Quanto tempo para ver resultados no Google?"
+      Nossos alunos, ao seguirem a metodologia passo-a-passo, conseguem tocar a primeira música com as duas mãos já na 4ª aula.
+  - question: "Terei acesso por quanto tempo?"
     answer: >-
-      Sites JAMstack geralmente começam a ranquear melhor em 2-4 semanas devido à performance superior. WordPress pode levar meses 
-      para melhorar porque o Google penaliza sites lentos.
+      O seu acesso é ilimitado! Você paga apenas uma vez e tem acesso contínuo às aulas e às futuras atualizações do curso.
 
 # 11. A ESCOLHA É SUA
-choiceTitle: "A Escolha é Sua"
-choiceOption1Title: "Opção 1"
+choiceTitle: "A Decisão é Sua"
+choiceOption1Title: "A Omissão"
 choiceOption1Text: >-
-  Continuar com WordPress, pagando hospedagem cara e lutando para ranquear na página 2 do Google.
-choiceOption2Title: "Opção 2"
+  Continuar carregando a frustração de nunca ter realizado o sonho de tocar seu piano favorito e deixar o estresse tomar conta da rotina...
+choiceOption2Title: "A Transformação"
 choiceOption2Text: >-
-  Migrar para JAMstack e construir um site que ranqueia no topo do Google com custo zero de hospedagem.
-choiceCtaText: "QUERO RANQUEAR NO GOOGLE AGORA"
-choiceCtaUrl: "/contato"
-choiceFooter: "Migração completa do WordPress para JAMstack"
+  Abraçar método "Direto ao Ponto", destravando as mãos já nas primeiras sessões, melhorando a qualidade de vida, tendo menos ansiedade e sendo mais feliz ao lado das teclas!
+choiceCtaText: "SIM! QUERO TOCAR PIANO AGORA!"
+choiceCtaUrl: "https://seu-link-de-afiliado.com"
+choiceFooter: "Vagas Promocionais Limitadas."

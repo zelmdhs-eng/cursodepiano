@@ -13,7 +13,7 @@ const year = new Date().getFullYear();
 
 // Carregar dados do rodapé do singleton do tema ativo
 const footerData = await readSingleton('footer', activeThemeId);
-const copyright = footerData?.copyright || `© ${year} CNX Agency - Built with Astro Structural Themes.`;
+const copyright = footerData?.copyright || `© ${year} Curso de Piano - Built with Astro Structural Themes.`;
 const description = footerData?.description || 'Transformando ideias em interfaces de alto impacto com Astro, Keystatic e Inteligência Artificial.';
 const columns = footerData?.columns || [];
 const socialLinks = footerData?.socialLinks || [];
@@ -23,7 +23,9 @@ const socialLinks = footerData?.socialLinks || [];
     <div class="container mx-auto">
         <div class="grid md:grid-cols-4 gap-12 mb-16">
             <div class="col-span-2">
-                <div class="text-2xl font-heading font-black text-white mb-6">Soberania Quântica</div>
+                <div class="text-2xl font-heading font-black text-white mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+                    {footerData?.title || 'Curso de Piano'}
+                </div>
                 <p class="text-slate-500 max-w-sm leading-relaxed">{description}</p>
             </div>
             {columns.map((column: any) => (

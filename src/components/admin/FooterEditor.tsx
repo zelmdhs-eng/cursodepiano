@@ -197,7 +197,7 @@ export default function FooterEditor({ initialData }: Props) {
                                 value={data.copyright || ''}
                                 onChange={(e) => updateField('copyright', e.target.value)}
                                 className="admin-input"
-                                placeholder="Ex: © 2024 CNX Agency. Todos os direitos reservados."
+                                placeholder="Ex: © 2024 Curso de Piano. Todos os direitos reservados."
                             />
                         </div>
                         <div>

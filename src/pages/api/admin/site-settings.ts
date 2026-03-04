@@ -26,7 +26,7 @@ async function readSettings(): Promise<Record<string, unknown>> {
         const content = await fs.readFile(SETTINGS_PATH, 'utf-8');
         return (yaml.load(content) as Record<string, unknown>) || {};
     } catch {
-        return { activeTheme: 'classic', siteName: 'CNX Agency', colorScheme: 'dark' };
+        return { activeTheme: 'classic', siteName: 'Curso de Piano', colorScheme: 'dark' };
     }
 }
 

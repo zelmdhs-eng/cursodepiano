@@ -1,0 +1,90 @@
+---
+interface Props {
+    score: number;       // e.g 9.5
+    maxScore?: number;   // default 10
+    authorName: string;
+    authorImage?: string;
+    verdictTitle?: string;
+    verdictText: string;
+}
+
+const { 
+    score, 
+    maxScore = 10, 
+    authorName, 
+    authorImage, 
+    verdictTitle = "Veredito do Especialista", 
+    verdictText 
+} = Astro.props;
+
+// Calculando estrelas completas, meias estrelas e vazias (baseado em 5 estrelas)
+const normalizedScore = (score / maxScore) * 5;
+const fullStars = Math.floor(normalizedScore);
+const hasHalfStar = (normalizedScore - fullStars) >= 0.5;
+const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+---
+
+<div class="my-10 bg-gradient-to-br from-black to-[#111] border-2 border-primary/30 rounded-2xl overflow-hidden shadow-[0_10px_40px_rgba(168,85,247,0.15)] relative">
+    <!-- Ribbon -->
+    <div class="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-4 py-1 rounded-bl-xl z-20 shadow-md">
+        Nossa Avaliação
+    </div>
+
+    <div class="p-6 md:p-8 flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start relative z-10">
+        <!-- Author Column -->
+        <div class="flex flex-col items-center justify-center min-w-[140px] border-b md:border-b-0 md:border-r border-white/10 pb-6 md:pb-0 md:pr-8">
+            <div class="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-primary/20 mb-3 bg-white/5 flex items-center justify-center">
+                {authorImage ? (
+                    <img src={authorImage} alt={authorName} class="w-full h-full object-cover" />
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" class="text-slate-400" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                )}
+            </div>
+            <p class="font-bold text-white text-center">{authorName}</p>
+            <p class="text-xs text-primary font-medium tracking-wide">ESPECIALISTA</p>
+        </div>
+        
+        <!-- Score Column -->
+        <div class="flex-1 flex flex-col justify-center">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+                <h3 class="text-2xl font-black text-white">{verdictTitle}</h3>
+                
+                <div class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-xl border border-white/10 shrink-0">
+                    <span class="text-3xl font-black bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">{score}</span>
+                    <div class="text-xs text-slate-400 font-bold leading-tight">
+                        <span class="block border-b border-white/20 pb-0.5 mb-0.5">/{maxScore}</span>
+                        <span class="block">SCORE</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stars -->
+            <div class="flex items-center gap-1 mb-5">
+                {Array.from({ length: fullStars }).map(() => (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-yellow-400">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                ))}
+                {hasHalfStar && (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor" clip-path="inset(0 50% 0 0)"></polygon>
+                    </svg>
+                )}
+                {Array.from({ length: emptyStars }).map(() => (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-600">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                ))}
+            </div>
+            
+            <!-- Verdict Text -->
+            <p class="text-slate-300 leading-relaxed text-[15px] sm:text-base italic bg-white/[0.02] p-4 rounded-xl border-l-4 border-primary">
+                "{verdictText}"
+            </p>
+        </div>
+    </div>
+</div>

@@ -1,16 +1,16 @@
-heroTitle: Entre em Contato
-heroSubtitle: Tem uma dúvida, sugestão ou quer trocar uma ideia? Manda uma mensagem — respondo todos os contatos.
-email: contato@paulafranco.com.br
-phone: 11 91550-6568
+heroTitle: Fale com o Professor
+heroSubtitle: Tem alguma dúvida sobre o método, acesso às aulas ou pagamentos? Envie uma mensagem!
+email: contato@cursodepiano.com.br
+phone: (11) 99999-9999
 address: |-
-  São Paulo, SP
-  Brasil
+  Atendimento Online
+  Seg à Sex (09h - 18h)
 socialLinks:
   - platform: Instagram
-    url: https://www.instagram.com/soberania_quantica
+    url: https://www.instagram.com/seu.instagram
     icon: 📸
   - platform: YouTube
-    url: https://www.youtube.com/@soberania_quantica
+    url: https://www.youtube.com/@seu.canal
     icon: 🎥
 formTitle: Envie sua Mensagem
 formSubmitText: Enviar Mensagem

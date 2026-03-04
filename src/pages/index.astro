@@ -1,23 +1,12 @@
 ---
-import { getCollection } from 'astro:content';
 import { readSingleton } from '../utils/singleton-utils';
-import HomeTemplate from '../themes/classic/Home.astro';
+import Lp1Template from '../themes/classic/Lp1.astro';
 
-const home = await readSingleton('home', 'classic') || {};
-
-const allPosts = await getCollection('posts');
-const latestPosts = allPosts
-    .filter(post => post.data.publishedDate)
-    .sort((a, b) => {
-        const dateA = new Date(a.data.publishedDate || 0).getTime();
-        const dateB = new Date(b.data.publishedDate || 0).getTime();
-        return dateB - dateA;
-    })
-    .slice(0, 9);
+// Inicializando os dados do template de Alta Conversão focado no curso de piano
+const lp1 = await readSingleton('lp1', 'classic') || {};
 ---
 
-<HomeTemplate 
-    homeData={home}
+<Lp1Template 
+    lp1Data={lp1}
     themeId="classic"
-    latestPosts={latestPosts}
 />
