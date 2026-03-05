@@ -13,7 +13,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import WYSIWYGEditor from './WYSIWYGEditor';
+import BlockEditor from './BlockEditor';
 import TurndownService from 'turndown';
 import { marked } from 'marked';
 import { useToast, ToastList } from './Toast';
@@ -330,7 +330,7 @@ export default function PostEditor({ post, authors, categories }: Props) {
                                     Conteúdo
                                 </label>
                                 <div className="h-[500px] rounded-lg overflow-hidden">
-                                    <WYSIWYGEditor
+                                    <BlockEditor
                                         value={content}
                                         onChange={setContent}
                                         placeholder="Comece a escrever seu post aqui..."
