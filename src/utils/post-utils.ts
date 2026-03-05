@@ -59,7 +59,7 @@ export async function readPost(slug: string): Promise<PostFile | null> {
         const filePath = path.join(POSTS_DIR, filename);
         const fileContent = await fs.readFile(filePath, 'utf-8');
         const parsed = matter(fileContent);
-        
+
         return {
             data: parsed.data as PostData,
             content: parsed.content,
@@ -78,13 +78,13 @@ export async function listPosts(): Promise<PostFile[]> {
     try {
         const files = await fs.readdir(POSTS_DIR);
         const mdocFiles = files.filter(f => f.endsWith('.mdoc'));
-        
+
         const posts = await Promise.all(
             mdocFiles.map(async (filename) => {
                 const filePath = path.join(POSTS_DIR, filename);
                 const fileContent = await fs.readFile(filePath, 'utf-8');
                 const parsed = matter(fileContent);
-                
+
                 return {
                     data: parsed.data as PostData,
                     content: parsed.content,
@@ -92,7 +92,7 @@ export async function listPosts(): Promise<PostFile[]> {
                 };
             })
         );
-        
+
         return posts;
     } catch (error) {
         console.error('❌ Erro ao listar posts:', error);
@@ -122,16 +122,23 @@ export async function writePost(
         });
         const fileContent = `---\n${frontmatter}---\n\n${content || ''}`;
         const filename = slugToFilename(slug);
+        const filePath = path.join(POSTS_DIR, filename);
 
         if (isGitHubConfigured()) {
-            return githubWriteFile(
-                `src/content/posts/${filename}`,
-                fileContent,
-                `content: save post "${slug}"`,
-            );
+            try {
+                const succ = await githubWriteFile(
+                    `src/content/posts/${filename}`,
+                    fileContent,
+                    `content: save post "${slug}"`,
+                );
+                if (succ) return true;
+                // Se retornou false, falhou lá, tentaremos salvar localmente abaixo
+            } catch (err) {
+                console.warn(`⚠️ Aviso: falha ao salvar post no GitHub, tentando local...`);
+            }
         }
 
-        const filePath = path.join(POSTS_DIR, filename);
+        await fs.mkdir(POSTS_DIR, { recursive: true });
         await fs.writeFile(filePath, fileContent, 'utf-8');
         return true;
     } catch (error) {
@@ -146,16 +153,21 @@ export async function writePost(
 export async function deletePost(slug: string): Promise<boolean> {
     try {
         const filename = slugToFilename(slug);
+        const filePath = path.join(POSTS_DIR, filename);
 
         if (isGitHubConfigured()) {
-            return githubDeleteFile(
-                `src/content/posts/${filename}`,
-                `content: delete post "${slug}"`,
-            );
+            try {
+                const succ = await githubDeleteFile(
+                    `src/content/posts/${filename}`,
+                    `content: delete post "${slug}"`,
+                );
+                if (succ) return true;
+            } catch (err) {
+                console.warn(`⚠️ Aviso: falha ao apagar post no GitHub, tentando local...`);
+            }
         }
 
-        const filePath = path.join(POSTS_DIR, filename);
-        await fs.unlink(filePath);
+        try { await fs.unlink(filePath); } catch { } // ignora erro se não existir local
         return true;
     } catch (error) {
         console.error(`❌ Erro ao deletar post ${slug}:`, error);
