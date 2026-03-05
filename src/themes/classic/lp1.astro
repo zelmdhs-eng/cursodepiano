@@ -71,12 +71,14 @@ const { lp1Data, themeId } = Astro.props;
                     <span class="hero-highlight block" style="background: linear-gradient(90deg,#a855f7,#ec4899,#f59e0b,#a855f7); background-size:300% 100%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; animation: gradientSlide 3s linear infinite;">
                         {lp1Data.heroTitleHighlight || 'você pode tocar piano.'}
                     </span>
-                    {lp1Data.heroTitleLine2 && (
-                        <span class="text-2xl sm:text-3xl md:text-4xl text-slate-300 font-bold mt-4 block leading-snug">
-                            {lp1Data.heroTitleLine2}
-                        </span>
-                    )}
                 </h1>
+
+                <!-- Subtítulo linha 2 (fora do H1 para SEO) -->
+                {lp1Data.heroTitleLine2 && (
+                    <p class="text-2xl sm:text-3xl md:text-4xl text-slate-300 font-bold mt-2 mb-6 leading-snug">
+                        {lp1Data.heroTitleLine2}
+                    </p>
+                )}
 
                 <!-- Subtítulo -->
                 {lp1Data.heroSubtitle && (
