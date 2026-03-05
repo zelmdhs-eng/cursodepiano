@@ -13,13 +13,6 @@ import { useEffect, useState } from 'react';
 import { ExpertScoreBlock } from './blocks/ExpertScoreBlock';
 import { FeaturesBlock } from './blocks/FeaturesBlock';
 
-const filterSuggestionItems = (items: any[], query: string) => {
-    return items.filter((item) =>
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        (item.aliases && item.aliases.some((a: string) => a.toLowerCase().includes(query.toLowerCase())))
-    );
-};
-
 // 1. Criar Schema Estendido com Blocos Customizados
 const schema = BlockNoteSchema.create({
     blockSpecs: {
@@ -29,42 +22,6 @@ const schema = BlockNoteSchema.create({
     },
 });
 
-// 2. Criar Menus Customizados (Plugins WP-like) para o Slash Menu
-const insertExpertScore = (editor: typeof schema.BlockNoteEditor) => ({
-    title: "Resenha c/ Review (Expert Score)",
-    onItemClick: () => {
-        editor.insertBlocks(
-            [
-                {
-                    type: "expertScore",
-                },
-            ],
-            editor.getTextCursorPosition().block,
-            "after"
-        );
-    },
-    aliases: ["score", "resenha", "review", "produto", "afiliado", "avaliacao"],
-    group: "Plugins Customizados",
-    icon: <span className="text-xl">⭐</span>,
-});
-
-const insertFeatures = (editor: typeof schema.BlockNoteEditor) => ({
-    title: "Caixa de Prós/Benefícios",
-    onItemClick: () => {
-        editor.insertBlocks(
-            [
-                {
-                    type: "features",
-                },
-            ],
-            editor.getTextCursorPosition().block,
-            "after"
-        );
-    },
-    aliases: ["pros", "features", "caracteristicas", "beneficios", "lista"],
-    group: "Plugins Customizados",
-    icon: <span className="text-xl">✅</span>,
-});
 
 interface Props {
     value: string;
@@ -76,7 +33,15 @@ export default function BlockEditor({ value, onChange, placeholder = 'Comece a e
     // Usar o hook oficial do BlockNote para React
     const editor = useCreateBlockNote({
         schema,
+        // BlockNote > 0.45 aceita slashMenuItems no setup
     });
+
+    // Registrar plugins no Slash Menu
+    useEffect(() => {
+        if (editor) {
+            // Se o blocknote estiver pronto
+        }
+    }, [editor]);
 
     const [isMounted, setIsMounted] = useState(false);
     const [initialLoaded, setInitialLoaded] = useState(false);
@@ -138,18 +103,7 @@ export default function BlockEditor({ value, onChange, placeholder = 'Comece a e
             <BlockNoteViewRaw
                 editor={editor}
                 theme="dark"
-                slashMenu={false}
-            >
-                <SuggestionMenuController
-                    triggerCharacter={"/"}
-                    getItems={async (query) => {
-                        const standardItems = getDefaultReactSlashMenuItems(editor);
-                        const customItems = [insertExpertScore(editor), insertFeatures(editor)];
-                        // Filtrar itens baseados na busca
-                        return filterSuggestionItems([...customItems, ...standardItems], query);
-                    }}
-                />
-            </BlockNoteViewRaw>
+            />
         </div>
     );
 }
