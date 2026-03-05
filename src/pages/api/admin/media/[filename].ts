@@ -40,20 +40,24 @@ export const DELETE: APIRoute = async ({ params, url }) => {
             }
 
             for (const repoPath of pathsToTry) {
-                const succ = await githubDeleteFile(repoPath, `media: delete image "${decodedFilename}"`);
-                if (succ) { deleted = true; break; }
+                try {
+                    const succ = await githubDeleteFile(repoPath, `media: delete image "${decodedFilename}"`);
+                    if (succ) { deleted = true; break; }
+                } catch {
+                    continue; // Ignorar erro e tentar o próximo caminho
+                }
             }
 
-            if (!deleted) {
-                throw new Error('Falha ao deletar arquivo no repositório GitHub (talvez ele não exista)');
+            if (deleted) {
+                return new Response(JSON.stringify({ success: true, message: 'Imagem deletada (GitHub)' }), {
+                    status: 200, headers: { 'Content-Type': 'application/json' },
+                });
             }
-
-            return new Response(JSON.stringify({ success: true, message: 'Imagem deletada (GitHub)' }), {
-                status: 200, headers: { 'Content-Type': 'application/json' },
-            });
+            // Se falhou no GitHub (ex: falta de permissão ou não encontrou), não joga erro. 
+            // Permite tentar deletar localmente abaixo.
         }
 
-        // 2. FLUXO LOCAL FILESYSTEM (Dev)
+        // 2. FLUXO LOCAL FILESYSTEM (Dev ou Vercel sem integração GitHub 100% ok)
         let filePath: string | null = null;
 
         if (typeFromQuery && MEDIA_TYPES.includes(typeFromQuery as any)) {
