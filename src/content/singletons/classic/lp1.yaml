@@ -1,5 +1,7 @@
-# Landing Page 1 - Piano Sales Page Format
-# Estrutura completa editável via CMS
+# SEO título e descrição (usados nas meta tags do navegador/Google)
+# Título: máximo 60 caracteres | Descrição: máximo 145 caracteres
+seoTitle: "Curso de Piano Online | Aprenda do Zero ao Avançado"
+seoDescription: "Aprenda piano do zero em qualquer idade. Método prático, sem partitura chata. Resultado já na 4ª aula. Acesso vitalício!"
 
 # 1. HERO SECTION
 heroBadge: "🎹 APRENDA PIANO EM QUALQUER IDADE"
@@ -7,8 +9,8 @@ heroTitleLine1: "Curso de Piano Online"
 heroTitleHighlight: "Direto ao Ponto."
 heroTitleLine2: "Do zero à sua música favorita, sem pressão, em qualquer idade."
 heroSubtitle: >-
-  Realize o seu sonho de tocar teclado ou piano, mesmo que você esteja começando do absoluto zero. 
-  Um método direto ao ponto, sem pressão e com resultados na 4ª aula.
+  Realize o seu sonho de tocar teclado ou piano do zero. Um método direto ao ponto,
+  sem pressão e com resultados já na 4ª aula.
 heroCtaText: "QUERO COMEÇAR MINHA PRIMEIRA AULA"
 heroCtaUrl: "#oferta"
 heroFeatures: "✅ Do Início a Maestria | ✅ Acesso Vitalício | ✅ Tuto Passo a Passo"
