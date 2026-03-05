@@ -5,11 +5,66 @@
  * Fornece interface visual moderna com blocos arrastáveis, similar ao WordPress Gutenberg e Notion.
  */
 
-import { createBlockNote } from '@blocknote/core';
-import { BlockNoteViewRaw, useBlockNoteEditor } from '@blocknote/react';
+import { BlockNoteSchema, defaultBlockSpecs } from '@blocknote/core';
+import { BlockNoteViewRaw, useBlockNoteEditor, SuggestionMenuController, getDefaultReactSlashMenuItems } from '@blocknote/react';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/react/style.css';
 import { useEffect, useState } from 'react';
+import { ExpertScoreBlock } from './blocks/ExpertScoreBlock';
+import { FeaturesBlock } from './blocks/FeaturesBlock';
+
+const filterSuggestionItems = (items: any[], query: string) => {
+    return items.filter((item) =>
+        item.title.toLowerCase().includes(query.toLowerCase()) ||
+        (item.aliases && item.aliases.some((a: string) => a.toLowerCase().includes(query.toLowerCase())))
+    );
+};
+
+// 1. Criar Schema Estendido com Blocos Customizados
+const schema = BlockNoteSchema.create({
+    blockSpecs: {
+        ...defaultBlockSpecs,
+        expertScore: ExpertScoreBlock(),
+        features: FeaturesBlock(),
+    },
+});
+
+// 2. Criar Menus Customizados (Plugins WP-like) para o Slash Menu
+const insertExpertScore = (editor: typeof schema.BlockNoteEditor) => ({
+    title: "Resenha c/ Review (Expert Score)",
+    onItemClick: () => {
+        editor.insertBlocks(
+            [
+                {
+                    type: "expertScore",
+                },
+            ],
+            editor.getTextCursorPosition().block,
+            "after"
+        );
+    },
+    aliases: ["score", "resenha", "review", "produto", "afiliado", "avaliacao"],
+    group: "Plugins Customizados",
+    icon: <span className="text-xl">⭐</span>,
+});
+
+const insertFeatures = (editor: typeof schema.BlockNoteEditor) => ({
+    title: "Caixa de Prós/Benefícios",
+    onItemClick: () => {
+        editor.insertBlocks(
+            [
+                {
+                    type: "features",
+                },
+            ],
+            editor.getTextCursorPosition().block,
+            "after"
+        );
+    },
+    aliases: ["pros", "features", "caracteristicas", "beneficios", "lista"],
+    group: "Plugins Customizados",
+    icon: <span className="text-xl">✅</span>,
+});
 
 interface Props {
     value: string;
@@ -21,14 +76,15 @@ export default function BlockEditor({ value, onChange, placeholder = 'Comece a e
     const [editor, setEditor] = useState<any>(null);
     const [isReady, setIsReady] = useState(false);
 
-    // Criar editor BlockNote
+    // Criar editor BlockNote com Schema Customizado
     useEffect(() => {
         const createEditor = async () => {
             try {
-                const newEditor = await createBlockNote({
+                // @ts-ignore
+                const newEditor = schema.BlockNoteEditor.create({
                     initialContent: undefined,
                 });
-                
+
                 setEditor(newEditor);
                 setIsReady(true);
             } catch (error) {
@@ -86,11 +142,22 @@ export default function BlockEditor({ value, onChange, placeholder = 'Comece a e
     }
 
     return (
-        <div className="h-full w-full bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-lg overflow-hidden">
-            <BlockNoteViewRaw 
+        <div className="h-full w-full bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-lg overflow-hidden relative pb-[150px]">
+            <BlockNoteViewRaw
                 editor={editor}
                 theme="dark"
-            />
+                slashMenu={false}
+            >
+                <SuggestionMenuController
+                    triggerCharacter={"/"}
+                    getItems={async (query) => {
+                        const standardItems = getDefaultReactSlashMenuItems(editor);
+                        const customItems = [insertExpertScore(editor), insertFeatures(editor)];
+                        // Filtrar itens baseados na busca
+                        return filterSuggestionItems([...customItems, ...standardItems], query);
+                    }}
+                />
+            </BlockNoteViewRaw>
         </div>
     );
 }
