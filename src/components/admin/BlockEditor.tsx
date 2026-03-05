@@ -1,27 +1,15 @@
 /**
  * BlockEditor.tsx
- * 
- * Componente React para editor de blocos estilo Gutenberg usando BlockNote.
- * Fornece interface visual moderna com blocos arrastáveis, similar ao WordPress Gutenberg e Notion.
+ *
+ * Editor de blocos usando BlockNote.
+ * Versão estável e simples - sem customizações que causam crash.
  */
 
-import { BlockNoteSchema, defaultBlockSpecs } from '@blocknote/core';
-import { BlockNoteViewRaw, useCreateBlockNote, useBlockNoteEditor, SuggestionMenuController, getDefaultReactSlashMenuItems } from '@blocknote/react';
+import { useCreateBlockNote } from '@blocknote/react';
+import { BlockNoteView } from '@blocknote/mantine';
 import '@blocknote/core/fonts/inter.css';
-import '@blocknote/react/style.css';
-import { useEffect, useState } from 'react';
-import { ExpertScoreBlock } from './blocks/ExpertScoreBlock';
-import { FeaturesBlock } from './blocks/FeaturesBlock';
-
-// 1. Criar Schema Estendido com Blocos Customizados
-const schema = BlockNoteSchema.create({
-    blockSpecs: {
-        ...defaultBlockSpecs,
-        expertScore: ExpertScoreBlock(),
-        features: FeaturesBlock(),
-    },
-});
-
+import '@blocknote/mantine/style.css';
+import { useEffect, useRef } from 'react';
 
 interface Props {
     value: string;
@@ -30,77 +18,57 @@ interface Props {
 }
 
 export default function BlockEditor({ value, onChange, placeholder = 'Comece a escrever...' }: Props) {
-    // Usar o hook oficial do BlockNote para React
+    const initialContentRef = useRef(value);
+
     const editor = useCreateBlockNote({
-        schema,
-        // BlockNote > 0.45 aceita slashMenuItems no setup
+        initialContent: undefined,
     });
 
-    // Registrar plugins no Slash Menu
+    // Carregar conteúdo inicial uma única vez
     useEffect(() => {
-        if (editor) {
-            // Se o blocknote estiver pronto
-        }
-    }, [editor]);
+        if (!editor || !initialContentRef.current) return;
 
-    const [isMounted, setIsMounted] = useState(false);
-    const [initialLoaded, setInitialLoaded] = useState(false);
-
-    // Evitar hidratacao errada do Astro
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    // Atualizar conteúdo inicial quando carregar
-    useEffect(() => {
-        if (editor && value && isMounted && !initialLoaded) {
-            setInitialLoaded(true);
+        const loadContent = async () => {
             try {
-                const blocks = editor.tryParseHTMLToBlocks(value);
+                const blocks = await editor.tryParseHTMLToBlocks(initialContentRef.current);
                 if (blocks && blocks.length > 0) {
                     editor.replaceBlocks(editor.document, blocks);
                 }
-            } catch (err) {
-                // ignorar silently
+            } catch {
+                // ignorar erro silently
             }
-        }
-    }, [value, editor, isMounted, initialLoaded]);
+        };
 
-    // Converter blocos para HTML quando mudar
+        loadContent();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editor]);
+
+    // Sincronizar mudanças do editor com o pai
     useEffect(() => {
-        if (!editor || !isMounted || !initialLoaded) return;
+        if (!editor) return;
 
-        const handleUpdate = async () => {
+        const unsubscribe = editor.onChange(async () => {
             try {
                 const html = await editor.blocksToHTMLLossy(editor.document);
-                if (html !== value) {
-                    onChange(html);
-                }
-            } catch (error) {
-                console.error('Erro ao converter blocos para HTML:', error);
+                onChange(html);
+            } catch {
+                // ignorar erro silently
             }
-        };
-
-        const unsubscribe = editor.onChange(() => {
-            handleUpdate();
         });
 
-        return () => {
-            unsubscribe();
-        };
-    }, [editor, isMounted, initialLoaded, value, onChange]);
-
-    if (!editor || !isMounted) {
-        return (
-            <div className="h-full w-full flex items-center justify-center bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-lg">
-                <p className="text-[#a3a3a3]">Carregando editor...</p>
-            </div>
-        );
-    }
+        return unsubscribe;
+    }, [editor, onChange]);
 
     return (
-        <div className="h-full w-full bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-lg overflow-hidden relative pb-[150px]">
-            <BlockNoteViewRaw
+        <div style={{
+            height: '100%',
+            width: '100%',
+            background: '#0a0a0a',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '8px',
+            overflow: 'auto',
+        }}>
+            <BlockNoteView
                 editor={editor}
                 theme="dark"
             />

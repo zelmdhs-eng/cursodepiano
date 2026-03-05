@@ -16,6 +16,7 @@
     "@astrojs/tailwind": "^6.0.2",
     "@astrojs/vercel": "^9.0.4",
     "@blocknote/core": "^0.47.0",
+    "@blocknote/mantine": "^0.47.1",
     "@blocknote/react": "^0.47.0",
     "@codemirror/basic-setup": "^0.20.0",
     "@codemirror/commands": "^6.10.2",
