@@ -6,7 +6,7 @@
  */
 
 import { BlockNoteSchema, defaultBlockSpecs } from '@blocknote/core';
-import { BlockNoteViewRaw, useBlockNoteEditor, SuggestionMenuController, getDefaultReactSlashMenuItems } from '@blocknote/react';
+import { BlockNoteViewRaw, useCreateBlockNote, useBlockNoteEditor, SuggestionMenuController, getDefaultReactSlashMenuItems } from '@blocknote/react';
 import '@blocknote/core/fonts/inter.css';
 import '@blocknote/react/style.css';
 import { useEffect, useState } from 'react';
@@ -73,44 +73,37 @@ interface Props {
 }
 
 export default function BlockEditor({ value, onChange, placeholder = 'Comece a escrever...' }: Props) {
-    const [editor, setEditor] = useState<any>(null);
-    const [isReady, setIsReady] = useState(false);
+    // Usar o hook oficial do BlockNote para React
+    const editor = useCreateBlockNote({
+        schema,
+    });
 
-    // Criar editor BlockNote com Schema Customizado
+    const [isMounted, setIsMounted] = useState(false);
+    const [initialLoaded, setInitialLoaded] = useState(false);
+
+    // Evitar hidratacao errada do Astro
     useEffect(() => {
-        const createEditor = async () => {
-            try {
-                // @ts-ignore
-                const newEditor = schema.BlockNoteEditor.create({
-                    initialContent: undefined,
-                });
-
-                setEditor(newEditor);
-                setIsReady(true);
-            } catch (error) {
-                console.error('Erro ao criar editor BlockNote:', error);
-            }
-        };
-
-        createEditor();
+        setIsMounted(true);
     }, []);
 
-    // Atualizar conteúdo quando value mudar externamente
+    // Atualizar conteúdo inicial quando carregar
     useEffect(() => {
-        if (editor && value && isReady) {
-            editor.tryParseHTMLToBlocks(value).then((blocks: any) => {
+        if (editor && value && isMounted && !initialLoaded) {
+            setInitialLoaded(true);
+            try {
+                const blocks = editor.tryParseHTMLToBlocks(value);
                 if (blocks && blocks.length > 0) {
                     editor.replaceBlocks(editor.document, blocks);
                 }
-            }).catch(() => {
-                // Se falhar, ignora silenciosamente
-            });
+            } catch (err) {
+                // ignorar silently
+            }
         }
-    }, [value, editor, isReady]);
+    }, [value, editor, isMounted, initialLoaded]);
 
     // Converter blocos para HTML quando mudar
     useEffect(() => {
-        if (!editor || !isReady) return;
+        if (!editor || !isMounted || !initialLoaded) return;
 
         const handleUpdate = async () => {
             try {
@@ -123,7 +116,6 @@ export default function BlockEditor({ value, onChange, placeholder = 'Comece a e
             }
         };
 
-        // Listener para mudanças no editor
         const unsubscribe = editor.onChange(() => {
             handleUpdate();
         });
@@ -131,9 +123,9 @@ export default function BlockEditor({ value, onChange, placeholder = 'Comece a e
         return () => {
             unsubscribe();
         };
-    }, [editor, isReady, value, onChange]);
+    }, [editor, isMounted, initialLoaded, value, onChange]);
 
-    if (!editor || !isReady) {
+    if (!editor || !isMounted) {
         return (
             <div className="h-full w-full flex items-center justify-center bg-[#0a0a0a] border border-[rgba(255,255,255,0.08)] rounded-lg">
                 <p className="text-[#a3a3a3]">Carregando editor...</p>
