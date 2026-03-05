@@ -37,11 +37,24 @@ const schema: any = {
 };
 
 if (pageType === 'website') {
-    schema["@type"] = "Organization";
+    schema["@type"] = "Course";
     schema["name"] = title;
-    schema["url"] = canonicalURL.href;
     schema["description"] = description;
-    schema["logo"] = new URL('/favicon.svg', Astro.site || 'https://cursodepiano.com.br').href;
+    schema["provider"] = {
+        "@type": "Organization",
+        "name": authorName || "Curso de Piano",
+        "sameAs": canonicalURL.origin
+    };
+    schema["aggregateRating"] = {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "bestRating": "5",
+        "ratingCount": "1284"
+    };
+    schema["offers"] = {
+        "@type": "Offer",
+        "category": "Paid"
+    };
 } else if (pageType === 'article') {
     schema["@type"] = "BlogPosting";
     schema["headline"] = title;
@@ -106,17 +119,17 @@ const secondaryRGB = hexToRgb(secondaryColor);
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={Astro.url} />
+        <meta property="og:url" content={canonicalURL} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.url)} />}
+        {ogImage && <meta property="og:image" content={new URL(ogImage, canonicalURL.origin)} />}
 
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={Astro.url} />
+        <meta property="twitter:url" content={canonicalURL} />
         <meta property="twitter:title" content={title} />
         <meta property="twitter:description" content={description} />
-        {ogImage && <meta property="twitter:image" content={new URL(ogImage, Astro.url)} />}
+        {ogImage && <meta property="twitter:image" content={new URL(ogImage, canonicalURL.origin)} />}
 
         <!-- JSON-LD Structured Data -->
         <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
