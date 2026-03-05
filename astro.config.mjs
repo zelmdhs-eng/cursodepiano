@@ -8,7 +8,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-    site: 'https://paulafranco.com.br',
+    site: 'https://cursodepiano.com.br',
     output: 'server',
     adapter: vercel(),
     security: {
