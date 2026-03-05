@@ -3,3 +3,6 @@ slug: professor-piano
 role: Mentor de Piano e Teclado
 avatar: /images/author-fallback.jpg
 bio: Mentor de música especialista em métodos práticos para adultos e iniciantes. Ajudo interessados a destravarem nas teclas sem precisar decorar partituras ou escalas cansativas.
+email: contato@cursodepiano.com.br
+adminRole: admin
+adminPasswordHash: efe05eaaa707c5a137ed3572b683806d67d9693893e575eee8aeec22a490f5cd
