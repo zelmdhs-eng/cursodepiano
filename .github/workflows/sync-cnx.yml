@@ -77,6 +77,13 @@ jobs:
             CHANGELOG.md \
             2>/dev/null || true
 
+          # ⚠️ PROTEGER arquivos customizados do aluno — restaurar versão local
+          # BlockEditor e blocos customizados (Expert Score, Features, Amazon)
+          git checkout HEAD -- \
+            src/components/admin/BlockEditor.tsx \
+            src/components/admin/blocks/ \
+            2>/dev/null || true
+
           # Verifica se houve mudanças reais
           if git diff --staged --quiet && [ "${{ inputs.force }}" != "true" ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
