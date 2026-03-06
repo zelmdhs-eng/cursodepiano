@@ -13,12 +13,14 @@
  * - Links diretos para o Keystatic
  */
 
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getAdminSiteMode } from '../../utils/admin-site-mode';
 import StatCard from '../../components/admin/StatCard.astro';
 import RecentPosts from '../../components/admin/RecentPosts.astro';
 import ConfigStatus from '../../components/admin/ConfigStatus.astro';
 import OnboardingTour from '../../components/admin/OnboardingTour.astro';
+import LocalDashboardWidget from '../../components/admin/LocalDashboardWidget';
 import { verifySession, SESSION_COOKIE } from '../../utils/auth-utils';
 
 // ─── Autenticação ─────────────────────────────────────────────────────────────
@@ -26,10 +28,22 @@ const token = Astro.cookies.get(SESSION_COOKIE)?.value;
 const sessionUser = token ? verifySession(token) : null;
 if (!sessionUser) return Astro.redirect('/admin/login');
 
-// ─── Dados do dashboard ───────────────────────────────────────────────────────
-const posts      = await getCollection('posts');
-const authors    = await getCollection('authors');
-const categories = await getCollection('categories');
+// ─── Dados do dashboard (com fallback em caso de erro em qualquer coleção) ─────
+let posts: Awaited<ReturnType<typeof getCollection<'posts'>>> = [];
+let authors: Awaited<ReturnType<typeof getCollection<'authors'>>> = [];
+let categories: Awaited<ReturnType<typeof getCollection<'categories'>>> = [];
+try {
+    [posts, authors, categories] = await Promise.all([
+        getCollection('posts').catch((e) => { console.error('\x1b[31m✗ [X] getCollection(posts):\x1b[0m', e); return []; }),
+        getCollection('authors').catch((e) => { console.error('\x1b[31m✗ [X] getCollection(authors):\x1b[0m', e); return []; }),
+        getCollection('categories').catch((e) => { console.error('\x1b[31m✗ [X] getCollection(categories):\x1b[0m', e); return []; }),
+    ]);
+} catch (e) {
+    console.error('\x1b[31m✗ [X] Erro ao carregar coleções do dashboard:\x1b[0m', e);
+}
+
+const settings   = await getEntry('siteSettings', 'settings').catch(() => null);
+const isLocalMode = getAdminSiteMode(Astro.cookies, settings) === 'local';
 
 const publishedPosts = posts.filter(p => p.data.publishedDate);
 const draftPosts     = posts.length - publishedPosts.length;
@@ -37,6 +51,45 @@ const isAdmin        = sessionUser.adminRole === 'admin';
 
 // Detecta se está usando a conta/senha padrão do template
 const isDefaultAccount = sessionUser.slug === 'admin';
+
+// Dados do modo local (Keywords, Bairros, Páginas) + cidade principal
+let localStats = { keywords: 0, bairros: 0, paginas: 0, comConteudo: 0 };
+let principalCityName: string | null = null;
+if (isLocalMode) {
+    try {
+        const { listServices } = await import('../../utils/service-utils');
+        const allLocations = await getCollection('locations').catch(() => []);
+        const services = await listServices();
+        const activeServices = services.filter(s => s.data.active !== false);
+        const bairros = allLocations.filter((l: any) => l.data?.active && l.data?.type !== 'cidade');
+        const byCityKey = new Map<string, { cityName: string; count: number }>();
+        for (const loc of bairros) {
+            const key = (loc.data?.citySlug || loc.data?.city || '').toString().toLowerCase().replace(/\s+/g, '-') || 'x';
+            const cityName = loc.data?.city || loc.data?.name || '';
+            if (!key || key === 'x') continue;
+            const curr = byCityKey.get(key);
+            if (curr) curr.count++; else byCityKey.set(key, { cityName, count: 1 });
+        }
+        let maxC = 0;
+        for (const [, { cityName, count }] of byCityKey) {
+            if (count > maxC && cityName) { maxC = count; principalCityName = cityName; }
+        }
+        if (!principalCityName && allLocations.length > 0) {
+            const first = allLocations.find((l: any) => l.data?.active && l.data?.type === 'cidade');
+            principalCityName = first?.data?.name || first?.data?.city || null;
+        }
+        const activeLocations = allLocations.filter((l: any) => l.data?.active);
+        const keywordsWithContent = activeServices.filter(s => !!s.data.generatedContent);
+        localStats = {
+            keywords:     activeServices.length,
+            bairros:      activeLocations.filter((l: any) => l.data?.type !== 'cidade').length,
+            paginas:      activeServices.length * activeLocations.filter((l: any) => l.data?.type !== 'cidade').length,
+            comConteudo:  keywordsWithContent.length,
+        };
+    } catch (e) {
+        console.error('\x1b[31m✗ [X] Erro ao carregar dados do modo local:\x1b[0m', e);
+    }
+}
 ---
 
 <AdminLayout title="Dashboard">
@@ -47,6 +100,7 @@ const isDefaultAccount = sessionUser.slug === 'admin';
         data-post-count={posts.length}
         data-category-count={categories.length}
         data-is-default-account={isDefaultAccount ? 'true' : 'false'}
+        data-actions-url={process.env.GITHUB_OWNER && process.env.GITHUB_REPO ? `https://github.com/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/settings/actions` : ''}
         style="display:none;"
     ></div>
 
@@ -66,103 +120,154 @@ const isDefaultAccount = sessionUser.slug === 'admin';
         </div>
     )}
 
-    <div class="flex items-start justify-between flex-wrap gap-4 mb-6">
-        <div>
-            <h1 class="text-3xl font-heading font-bold text-[#e5e5e5] mb-1">Dashboard</h1>
-            <p class="text-[#a3a3a3] text-sm">Olá, <strong class="text-white">{sessionUser.name}</strong> — visão geral do seu site</p>
+    {!isLocalMode && (
+        <div class="flex items-start justify-between flex-wrap gap-4 mb-6">
+            <div>
+                <h1 class="text-3xl font-heading font-bold text-[#e5e5e5] mb-1">Dashboard</h1>
+                <p class="text-[#a3a3a3] text-sm">
+                    Olá, <strong class="text-white">{sessionUser.name}</strong> — visão geral do seu site
+                </p>
+            </div>
         </div>
-        <!-- Badge de versão (compacto, visível sempre) -->
-        <div id="version-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs" style="background: var(--admin-surface); border: 1px solid var(--admin-border);">
-            <span id="version-badge-icon">⏳</span>
-            <span id="version-badge-text" class="text-[#737373]">Verificando versão...</span>
-        </div>
-    </div>
+    )}
 
-    <!-- Banner de atualização disponível (aparece só quando há update) -->
-    <div id="version-update-banner" class="hidden mb-6 rounded-xl overflow-hidden" style="border: 1px solid rgba(234,179,8,0.4); background: linear-gradient(135deg, rgba(234,179,8,0.08) 0%, rgba(234,179,8,0.04) 100%);">
-        <div class="flex items-center justify-between flex-wrap gap-4 p-4">
-            <div class="flex items-center gap-3">
-                <div class="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-lg" style="background: rgba(234,179,8,0.15);">🔔</div>
-                <div>
-                    <div class="text-sm font-bold" style="color: #fbbf24;" id="update-banner-title">Nova versão disponível</div>
-                    <div class="text-xs mt-0.5" style="color: #a3a3a3;" id="update-banner-subtitle">Clique em "Aplicar agora" para atualizar com 1 clique</div>
+    <!-- Onboarding: Checklist (só no modo Blog) -->
+    {!isLocalMode && (
+        <div id="tour-checklist">
+            <OnboardingTour
+                postCount={posts.length}
+                categoryCount={categories.length}
+                isDefaultAccount={isDefaultAccount}
+            />
+        </div>
+    )}
+
+    <!-- Modo Local: Hero WOW + métricas -->
+    {isLocalMode ? (
+        <>
+            <!-- Hero com gradiente emerald -->
+            <div class="rounded-2xl overflow-hidden mb-8" style="background: linear-gradient(135deg, #064e3b 0%, #047857 30%, #0d9488 70%, #14b8a6 100%); border: 1px solid rgba(20,184,166,0.3);">
+                <div class="p-8 md:p-10">
+                    <p class="text-emerald-200 text-sm font-medium mb-2">Olá, <strong class="text-white">{sessionUser.name}</strong>!</p>
+                    <h2 class="text-2xl md:text-3xl font-heading font-bold text-white mb-2">
+                        {localStats.paginas > 0
+                            ? `Seu site tem ${localStats.paginas} páginas ranqueando ${principalCityName ? `em ${principalCityName}` : 'na sua região'}`
+                            : principalCityName
+                                ? `Você está pronto para dominar ${principalCityName}`
+                                : 'Você está pronto para dominar sua região'}
+                    </h2>
+                    <div class="flex items-baseline gap-3 mt-6 mb-6">
+                        <span id="local-dash-big-number" class="text-5xl md:text-6xl font-heading font-black text-white tabular-nums" style="line-height: 1; letter-spacing: -0.02em;">{localStats.paginas}</span>
+                        <span class="text-lg text-emerald-100/90 font-medium">páginas no ar</span>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="/" target="_blank" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02]" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                            👁️ Ver meu site
+                        </a>
+                        <a href="/admin/gerar-paginas?tab=paginas" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02]" style="background: #10b981; color: white; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 14px rgba(16,185,129,0.4);">
+                            🚀 Gerar mais páginas
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-                <a id="update-banner-changelog" href="#" target="_blank" class="hidden text-xs px-3 py-1.5 rounded-lg transition-all" style="border: 1px solid rgba(234,179,8,0.25); color: #fbbf24; text-decoration: none;">
-                    Ver novidades →
+            <!-- 3 cards de métricas -->
+            <div id="tour-stats" class="grid grid-cols-3 gap-4 mb-8">
+                <a href="/admin/gerar-paginas?tab=keywords" class="admin-card p-5 group block transition-transform hover:scale-[1.02]">
+                    <div class="text-2xl mb-1">🔑</div>
+                    <div class="text-2xl font-heading font-bold text-[#e5e5e5]">{localStats.keywords}</div>
+                    <div class="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider">Keywords</div>
                 </a>
-                <button
-                    id="version-update-btn"
-                    class="text-xs px-5 py-2 rounded-lg font-bold transition-all flex items-center gap-2"
-                    style="background: rgba(234,179,8,0.2); border: 1px solid rgba(234,179,8,0.45); color: #fbbf24;"
-                >
-                    🔄 Aplicar agora
-                </button>
+                <a href="/admin/gerar-paginas?tab=bairros" class="admin-card p-5 group block transition-transform hover:scale-[1.02]">
+                    <div class="text-2xl mb-1">📍</div>
+                    <div class="text-2xl font-heading font-bold text-[#e5e5e5]">{localStats.bairros}</div>
+                    <div class="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider">Bairros</div>
+                </a>
+                <a href="/admin/gerar-paginas?tab=keywords" class="admin-card p-5 group block transition-transform hover:scale-[1.02]">
+                    <div class="text-2xl mb-1">✍️</div>
+                    <div class="text-2xl font-heading font-bold text-[#e5e5e5]">{localStats.comConteudo}</div>
+                    <div class="text-xs text-[#a3a3a3] font-medium uppercase tracking-wider">Com conteúdo IA</div>
+                </a>
             </div>
+        </>
+    ) : (
+        <div id="tour-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <StatCard title="Total de Posts"    value={posts.length}      icon="📝" link="/admin/posts"      />
+            <StatCard title="Posts Publicados"  value={publishedPosts.length} icon="✅" link="/admin/posts"  />
+            <StatCard title="Rascunhos"         value={draftPosts}        icon="📄" link="/admin/posts"      />
+            <StatCard title="Autores"           value={authors.length}    icon="👤" link="/admin/authors"    />
         </div>
-        <div id="version-update-status" class="hidden px-4 pb-4">
-            <div id="version-update-status-inner" class="text-xs px-3 py-2 rounded-lg"></div>
-        </div>
-    </div>
+    )}
 
-    <!-- Onboarding: Checklist de primeiros passos -->
-    <div id="tour-checklist">
-        <OnboardingTour
-            postCount={posts.length}
-            categoryCount={categories.length}
-            isDefaultAccount={isDefaultAccount}
-        />
-    </div>
-
-    <!-- Stats -->
-    <div id="tour-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard title="Total de Posts"    value={posts.length}      icon="📝" link="/admin/posts"      />
-        <StatCard title="Posts Publicados"  value={publishedPosts.length} icon="✅" link="/admin/posts"  />
-        <StatCard title="Rascunhos"         value={draftPosts}        icon="📄" link="/admin/posts"      />
-        <StatCard title="Autores"           value={authors.length}    icon="👤" link="/admin/authors"    />
-    </div>
-
-    <!-- Grid principal -->
+    <!-- Grid principal — Modo Local: resumo + ações | Modo Blog: posts + ações -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2">
-            <RecentPosts posts={posts} />
+            {isLocalMode ? (
+                <div class="admin-card p-6">
+                    <LocalDashboardWidget
+                        client:only="react"
+                        keywords={localStats.keywords}
+                        bairros={localStats.bairros}
+                        paginas={localStats.paginas}
+                        comConteudo={localStats.comConteudo}
+                    />
+                </div>
+            ) : (
+                <RecentPosts posts={posts} />
+            )}
         </div>
 
         <!-- Ações rápidas -->
         <div id="tour-quick-actions" class="admin-card p-6">
             <h3 class="text-base font-heading font-bold text-[#e5e5e5] mb-4">⚡ Ações Rápidas</h3>
             <div class="space-y-2">
-                <a href="/admin/posts/new"   class="admin-btn admin-btn-primary  text-sm w-full justify-center">+ Novo Post</a>
-                <a href="/admin/pages"       class="admin-btn admin-btn-ghost    text-sm w-full justify-start">✏️ Editar Páginas</a>
-                <a href="/admin/authors"     class="admin-btn admin-btn-ghost    text-sm w-full justify-start">👤 Gerenciar Autores</a>
-                <a href="/admin/categories"  class="admin-btn admin-btn-ghost    text-sm w-full justify-start">🏷️ Categorias</a>
-                {isAdmin && (
+                {isLocalMode ? (
                     <>
+                        <a href="/admin/gerar-paginas?tab=keywords" class="admin-btn admin-btn-ghost    text-sm w-full justify-start">🔑 Keywords</a>
+                        <a href="/admin/gerar-paginas?tab=bairros"  class="admin-btn admin-btn-ghost    text-sm w-full justify-start">📍 Bairros</a>
+                        <a href="/admin/gerar-paginas?tab=paginas" class="admin-btn admin-btn-ghost    text-sm w-full justify-start">🚀 Páginas</a>
                         <hr class="border-white/10 my-2" />
-                        <a href="/admin/pixels"    class="admin-btn admin-btn-ghost text-sm w-full justify-start">📡 Pixels & Analytics</a>
-                        <a href="/admin/analytics" class="admin-btn admin-btn-ghost text-sm w-full justify-start">📈 Ver Analytics</a>
+                        <a href="/admin/posts"       class="admin-btn admin-btn-ghost    text-sm w-full justify-start">📝 Posts</a>
+                        <a href="/admin/authors"     class="admin-btn admin-btn-ghost    text-sm w-full justify-start">👤 Autores</a>
+                        <a href="/admin/configuracoes" class="admin-btn admin-btn-ghost    text-sm w-full justify-start">🤖 Config. IA</a>
+                        <a href="/admin/pages/local-home" class="admin-btn admin-btn-ghost   text-sm w-full justify-start">🏠 Home Local</a>
+                    </>
+                ) : (
+                    <>
+                        <a href="/admin/posts"       class="admin-btn admin-btn-ghost    text-sm w-full justify-start">📝 Posts</a>
+                        <a href="/admin/pages"       class="admin-btn admin-btn-ghost    text-sm w-full justify-start">✏️ Editar Páginas</a>
+                        <a href="/admin/authors"     class="admin-btn admin-btn-ghost    text-sm w-full justify-start">👤 Autores</a>
+                        <a href="/admin/categories"  class="admin-btn admin-btn-ghost    text-sm w-full justify-start">🏷️ Categorias</a>
+                        {isAdmin && (
+                            <>
+                                <hr class="border-white/10 my-2" />
+                                <a href="/admin/pixels"    class="admin-btn admin-btn-ghost text-sm w-full justify-start">📡 Pixels & Analytics</a>
+                                <a href="/admin/analytics" class="admin-btn admin-btn-ghost text-sm w-full justify-start">📈 Ver Analytics</a>
+                            </>
+                        )}
                     </>
                 )}
                 <hr class="border-white/10 my-2" />
-                <a href="/" target="_blank"  class="admin-btn admin-btn-ghost    text-sm w-full justify-start">👁️ Ver Site Público</a>
+                <a href="/" target="_blank" class="admin-btn admin-btn-ghost text-sm w-full justify-start">👁️ Ver Site</a>
             </div>
         </div>
     </div>
 
-    <!-- Status -->
-    <div class="mt-6 admin-card p-5">
-        <div class="flex items-center gap-6 flex-wrap text-sm text-[#a3a3a3]">
-            <span>📝 <strong class="text-white">{posts.length}</strong> posts</span>
-            <span>👤 <strong class="text-white">{authors.length}</strong> autores</span>
-            <span>🏷️ <strong class="text-white">{categories.length}</strong> categorias</span>
-            <span class="ml-auto text-xs text-[#525252]">
-                Role: <span class={isAdmin ? 'text-violet-400' : 'text-sky-400'}>{sessionUser.adminRole}</span>
-            </span>
+    <!-- Status (só modo Blog) -->
+    {!isLocalMode && (
+        <div class="mt-6 admin-card p-5">
+            <div class="flex items-center gap-6 flex-wrap text-sm text-[#a3a3a3]">
+                <span>📝 <strong class="text-white">{posts.length}</strong> posts</span>
+                <span>👤 <strong class="text-white">{authors.length}</strong> autores</span>
+                <span>🏷️ <strong class="text-white">{categories.length}</strong> categorias</span>
+                <span class="ml-auto text-xs text-[#525252]">
+                    Role: <span class={isAdmin ? 'text-violet-400' : 'text-sky-400'}>{sessionUser.adminRole}</span>
+                </span>
+            </div>
         </div>
-    </div>
+    )}
 
-    <!-- Card de Aparência do Site -->
+    <!-- Card de Aparência do Site (só modo Blog) -->
+    {!isLocalMode && (
     <div class="mt-6 admin-card p-5">
         <div class="flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center gap-3">
@@ -195,6 +300,7 @@ const isDefaultAccount = sessionUser.slug === 'admin';
             <span id="appearance-status" class="text-xs text-[#525252] hidden">Salvando...</span>
         </div>
     </div>
+    )}
 
     <!-- Status de Configuração -->
     <ConfigStatus />
@@ -259,108 +365,3 @@ const isDefaultAccount = sessionUser.slug === 'admin';
 })();
 </script>
 
-<script is:inline>
-/* ── Versão do Template ────────────────────────────────────────── */
-(function () {
-    var badgeIcon    = document.getElementById('version-badge-icon');
-    var badgeText    = document.getElementById('version-badge-text');
-    var badge        = document.getElementById('version-badge');
-    var banner       = document.getElementById('version-update-banner');
-    var bannerTitle  = document.getElementById('update-banner-title');
-    var bannerSub    = document.getElementById('update-banner-subtitle');
-    var changelog    = document.getElementById('update-banner-changelog');
-    var updateBtn    = document.getElementById('version-update-btn');
-    var statusWrap   = document.getElementById('version-update-status');
-    var statusInner  = document.getElementById('version-update-status-inner');
-
-    fetch('/api/admin/version')
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.upToDate) {
-                if (badgeIcon) badgeIcon.textContent = '✅';
-                if (badgeText) {
-                    badgeText.textContent = 'v' + data.installed + ' — atualizado';
-                    badgeText.style.color = '#6b7280';
-                }
-            } else {
-                /* ── Badge no título ── */
-                if (badgeIcon) badgeIcon.textContent = '🔔';
-                if (badgeText) {
-                    badgeText.textContent = 'v' + data.installed + ' → v' + data.latest;
-                    badgeText.style.color = '#fbbf24';
-                    badgeText.style.fontWeight = '600';
-                }
-                if (badge) {
-                    badge.style.borderColor = 'rgba(234,179,8,0.35)';
-                    badge.style.background  = 'rgba(234,179,8,0.08)';
-                }
-
-                /* ── Banner de atualização ── */
-                if (bannerTitle) bannerTitle.textContent = '🔔 Nova versão disponível: v' + data.installed + ' → v' + data.latest;
-                if (banner) banner.classList.remove('hidden');
-
-                if (changelog && data.changelog) {
-                    changelog.href = data.changelog;
-                    changelog.classList.remove('hidden');
-                }
-            }
-        })
-        .catch(function () {
-            if (badgeIcon) badgeIcon.textContent = '❓';
-            if (badgeText) badgeText.textContent  = 'versão desconhecida';
-        });
-
-    /* ── Botão Aplicar agora ───────────────────────────── */
-    if (updateBtn) {
-        updateBtn.addEventListener('click', function () {
-            updateBtn.disabled      = true;
-            updateBtn.innerHTML     = '⏳ Iniciando...';
-            updateBtn.style.opacity = '0.6';
-            updateBtn.style.cursor  = 'not-allowed';
-
-            fetch('/api/admin/version/update', { method: 'POST' })
-                .then(function (r) { return r.json(); })
-                .then(function (res) {
-                    if (statusWrap)  statusWrap.classList.remove('hidden');
-                    if (res.success) {
-                        if (statusInner) {
-                            statusInner.style.background = 'rgba(74,222,128,0.08)';
-                            statusInner.style.border     = '1px solid rgba(74,222,128,0.2)';
-                            statusInner.style.color      = '#86efac';
-                            statusInner.textContent      = '✅ ' + res.message;
-                        }
-                        if (updateBtn)   updateBtn.classList.add('hidden');
-                        if (bannerTitle) bannerTitle.textContent = '⏳ Atualização em andamento...';
-                        if (bannerSub)   bannerSub.textContent   = 'Aguarde ~2 minutos. O site será reconstruído automaticamente.';
-                        if (badgeIcon)   badgeIcon.textContent   = '⏳';
-                        if (badgeText)   badgeText.textContent   = 'atualizando...';
-                    } else {
-                        if (statusInner) {
-                            statusInner.style.background = 'rgba(239,68,68,0.08)';
-                            statusInner.style.border     = '1px solid rgba(239,68,68,0.2)';
-                            statusInner.style.color      = '#fca5a5';
-                            statusInner.textContent      = '❌ ' + (res.error || 'Erro desconhecido.');
-                        }
-                        updateBtn.disabled      = false;
-                        updateBtn.innerHTML     = '🔄 Tentar novamente';
-                        updateBtn.style.opacity = '1';
-                        updateBtn.style.cursor  = 'pointer';
-                    }
-                })
-                .catch(function () {
-                    if (statusWrap)  statusWrap.classList.remove('hidden');
-                    if (statusInner) {
-                        statusInner.style.background = 'rgba(239,68,68,0.08)';
-                        statusInner.style.border     = '1px solid rgba(239,68,68,0.2)';
-                        statusInner.style.color      = '#fca5a5';
-                        statusInner.textContent      = '❌ Erro de rede. Tente novamente.';
-                    }
-                    updateBtn.disabled      = false;
-                    updateBtn.innerHTML     = '🔄 Tentar novamente';
-                    updateBtn.style.opacity = '1';
-                    updateBtn.style.cursor  = 'pointer';
-                });
-        });
-    }
-})();
-</script>

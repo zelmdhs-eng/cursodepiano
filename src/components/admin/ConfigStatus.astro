@@ -135,12 +135,15 @@ const vercelEnvUrl = 'https://vercel.com/dashboard';
 
         <!-- GitHub Actions (só mostra se GitHub está configurado) -->
         {isGitHubConfigured && (
-            <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; border-radius: 0.5rem; background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2);">
-                <span style="font-size: 1rem; flex-shrink: 0; margin-top: 1px;">⚙️</span>
+            <div style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; border-radius: 0.5rem; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.35);">
+                <span style="font-size: 1rem; flex-shrink: 0; margin-top: 1px;">⚠️</span>
                 <div style="flex: 1; min-width: 0;">
-                    <div style="font-size: 0.82rem; font-weight: 600; color: var(--admin-text);">
-                        GitHub Actions — Ativar atualizações automáticas
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #fbbf24;">
+                        GitHub Actions — Obrigatório para atualizações funcionarem
                     </div>
+                    <p style="font-size: 0.74rem; color: var(--admin-text-muted); margin-top: 0.25rem; margin-bottom: 0.375rem;">
+                        Sem isso, o botão <strong>&quot;Aplicar agora&quot;</strong> no banner de atualização retornará erro.
+                    </p>
                     <div style="margin-top: 0.375rem;">
                         <ol style="font-size: 0.73rem; color: var(--admin-text-muted); padding-left: 1.1rem; line-height: 1.8; margin-bottom: 0.5rem;">
                             <li>Clique no botão abaixo para abrir as configurações do seu repositório</li>
@@ -184,21 +187,31 @@ const vercelEnvUrl = 'https://vercel.com/dashboard';
 
 {isFullyConfigured && (
 <div class="mt-6 admin-card" style="border-color: rgba(74,222,128,0.2); background: rgba(74,222,128,0.03);">
-    <div style="padding: 0.875rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+    <div style="padding: 0.875rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
         <span style="font-size: 1.1rem;">✅</span>
-        <div style="flex: 1;">
+        <div style="flex: 1; min-width: 0;">
             <div style="font-size: 0.85rem; font-weight: 600; color: var(--admin-text);">Sistema configurado corretamente</div>
             <div style="font-size: 0.75rem; color: var(--admin-text-muted);">Todas as variáveis estão configuradas. Edição em produção ativa.</div>
         </div>
         {isGitHubConfigured && (
-            <a
-                href={actionsSettingsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style="font-size: 0.72rem; color: var(--admin-text-subtle); text-decoration: none; flex-shrink: 0;"
-            >
-                Configurações GitHub →
-            </a>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                <a
+                    href="/api/admin/test-github"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style="font-size: 0.75rem; font-weight: 600; padding: 0.35rem 0.65rem; border-radius: 0.375rem; background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); text-decoration: none;"
+                >
+                    🔧 Testar GitHub
+                </a>
+                <a
+                    href={actionsSettingsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style="font-size: 0.72rem; color: var(--admin-text-subtle); text-decoration: none;"
+                >
+                    Configurações →
+                </a>
+            </div>
         )}
     </div>
 </div>

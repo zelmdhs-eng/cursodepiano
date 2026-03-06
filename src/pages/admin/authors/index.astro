@@ -3,15 +3,20 @@
  * admin/authors/index.astro
  * 
  * Página de listagem de autores no painel administrativo.
+ * Não permite excluir o autor que está logado (bloqueio na UI e na API).
  */
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { getCollection } from 'astro:content';
+import { verifySession, SESSION_COOKIE } from '../../../utils/auth-utils';
 
 const authors = await getCollection('authors');
+const token = Astro.cookies.get(SESSION_COOKIE)?.value;
+const currentUser = token ? verifySession(token) : null;
+const currentUserSlug = currentUser?.slug ?? null;
 ---
 
-<AdminLayout title="Autores - Curso de Piano Admin">
+<AdminLayout title="Autores - CNX Agency Admin">
     <div class="space-y-6">
         <!-- Header -->
         <div class="flex items-center justify-between">
@@ -88,14 +93,23 @@ const authors = await getCollection('authors');
                                         >
                                             Editar
                                         </a>
-                                        <button
-                                            type="button"
-                                            class="admin-btn admin-btn-danger text-sm delete-author-btn"
-                                            data-slug={author.id}
-                                            data-name={author.data.name}
-                                        >
-                                            🗑️ Excluir
-                                        </button>
+                                        {currentUserSlug === author.id ? (
+                                            <span
+                                                class="admin-btn admin-btn-ghost text-sm opacity-50 cursor-not-allowed"
+                                                title="Você não pode excluir o próprio usuário"
+                                            >
+                                                🗑️ Excluir (você)
+                                            </span>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                class="admin-btn admin-btn-danger text-sm delete-author-btn"
+                                                data-slug={author.id}
+                                                data-name={author.data.name}
+                                            >
+                                                🗑️ Excluir
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>

@@ -45,7 +45,7 @@ export const GET: APIRoute = async () => {
 export const POST: APIRoute = async ({ request }) => {
     try {
         const body = await request.json();
-        const { title, slug, author, category, publishedDate, thumbnail, metaDescription, metaImage, content } = body;
+        const { title, slug, author, category, publishedDate, thumbnail, metaTitle, metaDescription, metaImage, content } = body;
         
         // Validações
         if (!title || !slug) {
@@ -78,6 +78,7 @@ export const POST: APIRoute = async ({ request }) => {
             category: category || undefined,
             publishedDate: publishedDate || undefined,
             thumbnail: thumbnail || undefined,
+            metaTitle: metaTitle || undefined,
             metaDescription: metaDescription || undefined,
             metaImage: metaImage || undefined,
         };

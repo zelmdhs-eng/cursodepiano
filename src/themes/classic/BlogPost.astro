@@ -1,30 +1,29 @@
 ---
 /**
  * BlogPost.astro - Página Individual de Post
- * 
+ *
  * Página de post individual seguindo o mesmo padrão de design da home.
- * Layout limpo e focado no conteúdo.
+ * layoutType: 'local' → usa LocalLayout (modo rank and rent); 'main' → MainLayout (agência).
  */
 
 import MainLayout from '../../layouts/MainLayout.astro';
+import LocalLayout from '../../layouts/LocalLayout.astro';
 
 interface Props {
     post: any;
     author: any;
     Content: any;
     themeId: string;
+    layoutType?: 'main' | 'local';
+    readingTimeMinutes?: number;
 }
 
-const { post, author, Content, themeId } = Astro.props;
+const { post, author, Content, themeId, layoutType = 'main', readingTimeMinutes } = Astro.props;
+const Layout = layoutType === 'local' ? LocalLayout : MainLayout;
+const pageTitle = post.data.metaTitle || post.data.title;
 ---
 
-<MainLayout 
-    title={post.data.title} 
-    description={post.data.metaDescription} 
-    pageType="article" 
-    authorName={author?.data?.name} 
-    publishedDate={post.data.publishedDate}
->
+<Layout title={pageTitle}>
     
     <!-- HERO SECTION -->
     <section class="relative min-h-[50vh] flex items-center justify-center pt-24 md:pt-32 overflow-hidden">
@@ -61,30 +60,41 @@ const { post, author, Content, themeId } = Astro.props;
                     </p>
                 )}
                 
-                {author && (
-                    <div class="flex items-center justify-center gap-4">
-                        {author.data.avatar && (
-                            <img 
-                                src={author.data.avatar} 
-                                alt={author.data.name} 
-                                class="w-12 h-12 rounded-full ring-2 ring-primary/30"
-                            />
-                        )}
-                        <div class="text-left">
-                            <p class="font-bold text-sm" style="color: var(--blog-text);">{author.data.name}</p>
-                            <p class="text-xs uppercase tracking-tighter" style="color: var(--blog-text-subtle);">{author.data.role}</p>
+                <div class="flex items-center justify-center gap-4 flex-wrap">
+                    {author && (
+                        <div class="flex items-center gap-4">
+                            {author.data.avatar && (
+                                <img 
+                                    src={author.data.avatar} 
+                                    alt={author.data.name} 
+                                    class="w-12 h-12 rounded-full ring-2 ring-primary/30"
+                                />
+                            )}
+                            <div class="text-left">
+                                <p class="font-bold text-sm" style="color: var(--blog-text);">{author.data.name}</p>
+                                <p class="text-xs uppercase tracking-tighter" style="color: var(--blog-text-subtle);">{author.data.role}</p>
+                            </div>
                         </div>
-                        {post.data.publishedDate && (
-                            <span class="text-sm" style="color: var(--blog-text-subtle);">
-                                {new Date(post.data.publishedDate).toLocaleDateString('pt-BR', {
-                                    day: '2-digit',
-                                    month: 'long',
-                                    year: 'numeric'
-                                })}
-                            </span>
-                        )}
-                    </div>
-                )}
+                    )}
+                    {(post.data.publishedDate || readingTimeMinutes) && (
+                        <div class="flex items-center gap-4">
+                            {post.data.publishedDate && (
+                                <span class="text-sm" style="color: var(--blog-text-subtle);">
+                                    {new Date(post.data.publishedDate).toLocaleDateString('pt-BR', {
+                                        day: '2-digit',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    })}
+                                </span>
+                            )}
+                            {readingTimeMinutes && readingTimeMinutes > 0 && (
+                                <span class="text-sm" style="color: var(--blog-text-subtle);">
+                                    ⏱ {readingTimeMinutes} min de leitura
+                                </span>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
         
@@ -151,4 +161,4 @@ const { post, author, Content, themeId } = Astro.props;
         </section>
     )}
 
-</MainLayout>
+</Layout>

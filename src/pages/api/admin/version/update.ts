@@ -38,7 +38,8 @@ export const POST: APIRoute = async ({ cookies }) => {
     if (!githubToken || !githubOwner || !githubRepo) {
         return new Response(JSON.stringify({
             success: false,
-            error: 'Configure GITHUB_TOKEN, GITHUB_OWNER e GITHUB_REPO nas variáveis de ambiente da Vercel.',
+            error: 'Configure GITHUB_TOKEN, GITHUB_OWNER e GITHUB_REPO nas variáveis de ambiente da Vercel (Settings → Environment Variables).',
+            helpUrl: '/admin/ajuda#primeiros-passos',
         }), {
             status: 400,
             headers: { 'Content-Type': 'application/json' },
@@ -71,23 +72,39 @@ export const POST: APIRoute = async ({ cookies }) => {
             });
         }
 
-        // 422 = workflow não encontrado ou branch inválida
+        const body = await res.text();
+        const actionsSettingsUrl = `https://github.com/${githubOwner}/${githubRepo}/settings/actions`;
+
+        // 422 = workflow não encontrado ou permissões não configuradas
         if (res.status === 422) {
             return new Response(JSON.stringify({
                 success: false,
-                error: 'Workflow não encontrado. Verifique se o arquivo sync-cnx.yml existe no seu repositório.',
+                error: 'Workflow não encontrado ou permissões do GitHub Actions não ativadas. Ative em GitHub → Settings → Actions: "Read and write permissions" e "Allow GitHub Actions to create and approve pull requests".',
+                helpUrl: actionsSettingsUrl,
             }), {
                 status: 422,
                 headers: { 'Content-Type': 'application/json' },
             });
         }
 
-        const body = await res.text();
-        console.error(`❌ GitHub API respondeu ${res.status}:`, body);
+        // 403 = permissões insuficientes (workflow permissions)
+        if (res.status === 403) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: 'Acesso negado pelo GitHub. Ative as permissões do workflow em GitHub → Settings → Actions (Passo 3 em Ajuda → Primeiros passos).',
+                helpUrl: actionsSettingsUrl,
+            }), {
+                status: 403,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+
+        console.error('\x1b[31m✗ [X] GitHub API respondeu ' + res.status + ':\x1b[0m', body);
 
         return new Response(JSON.stringify({
             success: false,
-            error: `Erro ao acionar o workflow (status ${res.status}). Verifique se o GITHUB_TOKEN tem permissão "repo".`,
+            error: `Erro ao acionar o workflow (status ${res.status}). Verifique se o GITHUB_TOKEN tem permissão "repo" e se as permissões do workflow estão ativadas (Ajuda → Primeiros passos).`,
+            helpUrl: actionsSettingsUrl,
         }), {
             status: res.status,
             headers: { 'Content-Type': 'application/json' },

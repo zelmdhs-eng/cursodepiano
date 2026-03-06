@@ -31,6 +31,7 @@ export interface PostData {
     category?: string;
     publishedDate?: string;
     thumbnail?: string;
+    metaTitle?: string;
     metaDescription?: string;
     metaImage?: string;
 }
@@ -42,6 +43,7 @@ export interface PostFile {
 }
 
 const POSTS_DIR = path.resolve('./src/content/posts');
+const DELETED_DIR = path.join(POSTS_DIR, '_deleted');
 
 /**
  * Gera nome de arquivo baseado no slug
@@ -59,7 +61,7 @@ export async function readPost(slug: string): Promise<PostFile | null> {
         const filePath = path.join(POSTS_DIR, filename);
         const fileContent = await fs.readFile(filePath, 'utf-8');
         const parsed = matter(fileContent);
-
+        
         return {
             data: parsed.data as PostData,
             content: parsed.content,
@@ -78,13 +80,13 @@ export async function listPosts(): Promise<PostFile[]> {
     try {
         const files = await fs.readdir(POSTS_DIR);
         const mdocFiles = files.filter(f => f.endsWith('.mdoc'));
-
+        
         const posts = await Promise.all(
             mdocFiles.map(async (filename) => {
                 const filePath = path.join(POSTS_DIR, filename);
                 const fileContent = await fs.readFile(filePath, 'utf-8');
                 const parsed = matter(fileContent);
-
+                
                 return {
                     data: parsed.data as PostData,
                     content: parsed.content,
@@ -92,7 +94,7 @@ export async function listPosts(): Promise<PostFile[]> {
                 };
             })
         );
-
+        
         return posts;
     } catch (error) {
         console.error('❌ Erro ao listar posts:', error);
@@ -122,23 +124,16 @@ export async function writePost(
         });
         const fileContent = `---\n${frontmatter}---\n\n${content || ''}`;
         const filename = slugToFilename(slug);
-        const filePath = path.join(POSTS_DIR, filename);
 
         if (isGitHubConfigured()) {
-            try {
-                const succ = await githubWriteFile(
-                    `src/content/posts/${filename}`,
-                    fileContent,
-                    `content: save post "${slug}"`,
-                );
-                if (succ) return true;
-                // Se retornou false, falhou lá, tentaremos salvar localmente abaixo
-            } catch (err) {
-                console.warn(`⚠️ Aviso: falha ao salvar post no GitHub, tentando local...`);
-            }
+            return githubWriteFile(
+                `src/content/posts/${filename}`,
+                fileContent,
+                `content: save post "${slug}"`,
+            );
         }
 
-        await fs.mkdir(POSTS_DIR, { recursive: true });
+        const filePath = path.join(POSTS_DIR, filename);
         await fs.writeFile(filePath, fileContent, 'utf-8');
         return true;
     } catch (error) {
@@ -148,29 +143,36 @@ export async function writePost(
 }
 
 /**
- * Deleta um post (local ou via GitHub API em produção)
+ * Deleta um post (local ou via GitHub API em produção).
+ * Em ambiente local: faz soft delete (move para _deleted) para evitar
+ * UnknownFilesystemError da Astro Content Layer ao usar fs.unlink.
  */
 export async function deletePost(slug: string): Promise<boolean> {
     try {
         const filename = slugToFilename(slug);
-        const filePath = path.join(POSTS_DIR, filename);
 
         if (isGitHubConfigured()) {
-            try {
-                const succ = await githubDeleteFile(
-                    `src/content/posts/${filename}`,
-                    `content: delete post "${slug}"`,
-                );
-                if (succ) return true;
-            } catch (err) {
-                console.warn(`⚠️ Aviso: falha ao apagar post no GitHub, tentando local...`);
-            }
+            return githubDeleteFile(
+                `src/content/posts/${filename}`,
+                `content: delete post "${slug}"`,
+            );
         }
 
-        try { await fs.unlink(filePath); } catch { } // ignora erro se não existir local
+        const filePath = path.join(POSTS_DIR, filename);
+
+        try {
+            await fs.access(filePath);
+        } catch {
+            console.error(`\x1b[31m✗ [X] Post não encontrado: ${slug}\x1b[0m`);
+            return false;
+        }
+
+        await fs.mkdir(DELETED_DIR, { recursive: true });
+        const deletedPath = path.join(DELETED_DIR, `${filename}.deleted`);
+        await fs.rename(filePath, deletedPath);
         return true;
     } catch (error) {
-        console.error(`❌ Erro ao deletar post ${slug}:`, error);
+        console.error('\x1b[31m✗ [X] Erro ao deletar post', slug, ':\x1b[0m', error);
         return false;
     }
 }

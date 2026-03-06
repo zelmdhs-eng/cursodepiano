@@ -16,9 +16,10 @@
 import AdminSidebar from '../components/admin/Sidebar.astro';
 import AdminHeader from '../components/admin/Header.astro';
 import { verifySession, SESSION_COOKIE } from '../utils/auth-utils';
+import { getAdminSiteMode } from '../utils/admin-site-mode';
+import { getEntry } from 'astro:content';
 import '../styles/global.css';
 import '../styles/admin.css';
-import '../styles/blocknote.css';
 import '@fontsource/inter';
 import '@fontsource/outfit';
 
@@ -40,6 +41,10 @@ const currentUser = token ? verifySession(token) : null;
 if (!currentUser) {
     return Astro.redirect('/admin/login');
 }
+
+const settings  = await getEntry('siteSettings', 'settings').catch(() => null);
+const siteMode  = getAdminSiteMode(Astro.cookies, settings);
+const isLocal   = siteMode === 'local';
 
 const primaryColor = '#a855f7';
 const secondaryColor = '#ec4899';
@@ -100,14 +105,42 @@ const secondaryRGB = hexToRgb(secondaryColor);
         <!-- Background -->
         <div class="fixed inset-0 -z-10 h-full w-full" style="background: var(--admin-bg);"></div>
 
-        <div class="flex h-screen overflow-hidden">
+        <div class="flex h-screen overflow-hidden" data-site-mode={siteMode}>
             <!-- Sidebar -->
             <AdminSidebar user={currentUser} />
 
             <!-- Main Content Area -->
-            <div class="flex flex-col flex-1 overflow-hidden">
+            <div class="flex flex-col flex-1 overflow-hidden admin-main-area">
                 <!-- Header -->
-                <AdminHeader user={currentUser} />
+                <AdminHeader user={currentUser} siteMode={siteMode} />
+
+                <!-- Banner de atualização do template (visível em todas as páginas do admin) -->
+                <div id="version-update-banner" class="hidden mx-6 lg:mx-8 mt-4 mb-4 rounded-xl overflow-hidden flex-shrink-0" style="border: 1px solid rgba(234,179,8,0.4); background: linear-gradient(135deg, rgba(234,179,8,0.08) 0%, rgba(234,179,8,0.04) 100%);">
+                    <div class="flex items-center justify-between flex-wrap gap-4 p-4">
+                        <div class="flex items-center gap-3">
+                            <div class="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-lg" style="background: rgba(234,179,8,0.15);">🔔</div>
+                            <div>
+                                <div class="text-sm font-bold" style="color: #fbbf24;" id="update-banner-title">Nova versão disponível</div>
+                                <div class="text-xs mt-0.5" style="color: #a3a3a3;" id="update-banner-subtitle">Clique em &quot;Aplicar agora&quot; para atualizar com 1 clique</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <a id="update-banner-changelog" href="#" target="_blank" class="hidden text-xs px-3 py-1.5 rounded-lg transition-all" style="border: 1px solid rgba(234,179,8,0.25); color: #fbbf24; text-decoration: none;">
+                                Ver novidades →
+                            </a>
+                            <button
+                                id="version-update-btn"
+                                class="text-xs px-5 py-2 rounded-lg font-bold transition-all flex items-center gap-2"
+                                style="background: rgba(234,179,8,0.2); border: 1px solid rgba(234,179,8,0.45); color: #fbbf24;"
+                            >
+                                🔄 Aplicar agora
+                            </button>
+                        </div>
+                    </div>
+                    <div id="version-update-status" class="hidden px-4 pb-4">
+                        <div id="version-update-status-inner" class="text-xs px-3 py-2 rounded-lg"></div>
+                    </div>
+                </div>
 
                 <!-- Page Content -->
                 <main class="flex-1 overflow-y-auto p-6 lg:p-8">
@@ -115,5 +148,110 @@ const secondaryRGB = hexToRgb(secondaryColor);
                 </main>
             </div>
         </div>
+
+        <!-- Verificação de versão do template (em todas as páginas do admin) -->
+        <script is:inline>
+        (function () {
+            var badgeIcon = document.getElementById('version-badge-icon');
+            var badgeText = document.getElementById('version-badge-text');
+            var badge = document.getElementById('version-badge');
+            var banner = document.getElementById('version-update-banner');
+            var bannerTitle = document.getElementById('update-banner-title');
+            var bannerSub = document.getElementById('update-banner-subtitle');
+            var changelog = document.getElementById('update-banner-changelog');
+            var updateBtn = document.getElementById('version-update-btn');
+            var statusWrap = document.getElementById('version-update-status');
+            var statusInner = document.getElementById('version-update-status-inner');
+
+            fetch('/api/admin/version')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.upToDate) {
+                        if (badgeIcon) badgeIcon.textContent = '✅';
+                        if (badgeText) {
+                            badgeText.textContent = 'v' + data.installed;
+                            badgeText.style.color = 'var(--admin-text-subtle)';
+                        }
+                    } else {
+                        if (badgeIcon) badgeIcon.textContent = '🔔';
+                        if (badgeText) {
+                            badgeText.textContent = 'v' + data.installed + ' → v' + data.latest;
+                            badgeText.style.color = '#fbbf24';
+                            badgeText.style.fontWeight = '600';
+                        }
+                        if (badge) {
+                            badge.style.borderColor = 'rgba(234,179,8,0.35)';
+                            badge.style.background = 'rgba(234,179,8,0.08)';
+                        }
+                        if (bannerTitle) bannerTitle.textContent = '🔔 Nova versão: v' + data.installed + ' → v' + data.latest;
+                        if (banner) banner.classList.remove('hidden');
+                        if (changelog && data.changelog) {
+                            changelog.href = data.changelog;
+                            changelog.classList.remove('hidden');
+                        }
+                    }
+                })
+                .catch(function () {
+                    if (badgeIcon) badgeIcon.textContent = '❓';
+                    if (badgeText) badgeText.textContent = 'versão desconhecida';
+                });
+
+            if (updateBtn) {
+                updateBtn.addEventListener('click', function () {
+                    updateBtn.disabled = true;
+                    updateBtn.innerHTML = '⏳ Iniciando...';
+                    updateBtn.style.opacity = '0.6';
+                    updateBtn.style.cursor = 'not-allowed';
+
+                    fetch('/api/admin/version/update', { method: 'POST' })
+                        .then(function (r) { return r.json(); })
+                        .then(function (res) {
+                            if (statusWrap) statusWrap.classList.remove('hidden');
+                            if (res.success) {
+                                if (statusInner) {
+                                    statusInner.style.background = 'rgba(74,222,128,0.08)';
+                                    statusInner.style.border = '1px solid rgba(74,222,128,0.2)';
+                                    statusInner.style.color = '#86efac';
+                                    statusInner.textContent = '✅ ' + res.message;
+                                }
+                                if (updateBtn) updateBtn.classList.add('hidden');
+                                if (bannerTitle) bannerTitle.textContent = '⏳ Atualização em andamento...';
+                                if (bannerSub) bannerSub.textContent = 'Aguarde ~2 minutos. O site será reconstruído automaticamente.';
+                                if (badgeIcon) badgeIcon.textContent = '⏳';
+                                if (badgeText) badgeText.textContent = 'atualizando...';
+                            } else {
+                                if (statusInner) {
+                                    statusInner.style.background = 'rgba(239,68,68,0.08)';
+                                    statusInner.style.border = '1px solid rgba(239,68,68,0.2)';
+                                    statusInner.style.color = '#fca5a5';
+                                    var errHtml = '❌ ' + (res.error || 'Erro desconhecido.');
+                                    if (res.helpUrl) {
+                                        errHtml += ' <a href="' + res.helpUrl + '" target="_blank" rel="noopener noreferrer" style="color:#fbbf24;text-decoration:underline;margin-left:4px;">Abrir configurações do GitHub →</a>';
+                                    }
+                                    statusInner.innerHTML = errHtml;
+                                }
+                                updateBtn.disabled = false;
+                                updateBtn.innerHTML = '🔄 Tentar novamente';
+                                updateBtn.style.opacity = '1';
+                                updateBtn.style.cursor = 'pointer';
+                            }
+                        })
+                        .catch(function () {
+                            if (statusWrap) statusWrap.classList.remove('hidden');
+                            if (statusInner) {
+                                statusInner.style.background = 'rgba(239,68,68,0.08)';
+                                statusInner.style.border = '1px solid rgba(239,68,68,0.2)';
+                                statusInner.style.color = '#fca5a5';
+                                statusInner.textContent = '❌ Erro de rede. Tente novamente.';
+                            }
+                            updateBtn.disabled = false;
+                            updateBtn.innerHTML = '🔄 Tentar novamente';
+                            updateBtn.style.opacity = '1';
+                            updateBtn.style.cursor = 'pointer';
+                        });
+                });
+            }
+        })();
+        </script>
     </body>
 </html>

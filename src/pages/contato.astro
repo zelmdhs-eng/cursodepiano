@@ -1,23 +1,52 @@
 ---
 /**
  * contato.astro - Página de Contato
- * 
- * Página de contato seguindo o mesmo padrão de design da home.
- * Estrutura: Hero, Informações de Contato, Formulário, CTA
+ *
+ * Roteia para o componente correto conforme siteMode:
+ * - local → themes/local/Contato.astro (identidade visual azul/WhatsApp)
+ * - blog  → MainLayout com conteúdo do tema classic (roxo/preto)
  */
 
 import { getEntry } from 'astro:content';
 import MainLayout from '../layouts/MainLayout.astro';
+import LocalContato from '../themes/local/Contato.astro';
 import { readSingleton } from '../utils/singleton-utils';
+import { getSiteContactInfo } from '../utils/site-contact';
 
-// Obter tema ativo
-const settings = await getEntry('siteSettings', 'settings');
-const activeThemeId = settings?.data.activeTheme || 'classic';
+const settings = await getEntry('siteSettings', 'settings').catch(() => null);
+const siteMode = settings?.data?.siteMode || 'blog';
+const isLocal = siteMode === 'local';
 
-const data = await readSingleton('contact', activeThemeId);
+let data: Record<string, unknown> | null;
+if (isLocal) {
+    const localContact = await readSingleton('contact', 'local');
+    if (localContact) {
+        data = localContact;
+    } else {
+        const [localHome, contact] = await Promise.all([
+            readSingleton('home', 'local') || {},
+            getSiteContactInfo(),
+        ]);
+        data = {
+            heroTitle: 'Entre em Contato',
+            heroSubtitle: localHome.ctaText || 'Estamos prontos para atender. Entre em contato pelo WhatsApp, telefone ou e-mail.',
+            email: localHome.companyEmail || '',
+            phone: contact.phone || contact.whatsapp,
+            address: [localHome.companyAddress, localHome.companyCity, localHome.companyState, localHome.companyCEP].filter(Boolean).join(' - '),
+        };
+    }
+} else {
+    const activeThemeId = settings?.data?.activeTheme || 'classic';
+    data = await readSingleton('contact', activeThemeId);
+}
+
+const siteName = isLocal ? ((await readSingleton('home', 'local'))?.companyName || 'Site') : 'CNX Agency';
 ---
 
-<MainLayout title={`${data?.heroTitle || 'Contato'} - Curso de Piano Online`} pageType="contact">
+{isLocal ? (
+    <LocalContato data={data || {}} siteName={siteName} />
+) : (
+<MainLayout title={`${data?.heroTitle || 'Contato'} - ${siteName}`}>
     
     <!-- HERO SECTION -->
     <section class="relative min-h-[70vh] flex items-center justify-center pt-24 md:pt-32 overflow-hidden">
@@ -80,7 +109,7 @@ const data = await readSingleton('contact', activeThemeId);
                                 </div>
                                 <div>
                                     <p class="text-sm text-slate-500 mb-1">Telefone</p>
-                                    <a href={`tel:${data.phone.replace(/\D/g, '')}`} class="text-white hover:text-primary transition-colors">
+                                    <a href={`tel:${String(data.phone || '').replace(/\D/g, '')}`} class="text-white hover:text-primary transition-colors">
                                         {data.phone}
                                     </a>
                                 </div>
@@ -246,3 +275,4 @@ const data = await readSingleton('contact', activeThemeId);
         });
     </script>
 </MainLayout>
+)}

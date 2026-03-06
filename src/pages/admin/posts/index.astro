@@ -9,8 +9,12 @@
 
 import { getCollection, getEntry } from 'astro:content';
 import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getPostUrl, type BlogPermalinkStructure } from '../../../utils/blog-permalink';
 
 const posts = await getCollection('posts');
+const settings = await getEntry('siteSettings', 'settings').catch(() => null);
+const blogPermalinkStructure = (settings?.data?.blogPermalinkStructure as BlogPermalinkStructure) || 'postname';
+const blogUrlPrefix = (settings?.data?.blogUrlPrefix as import('../../../utils/blog-permalink').BlogUrlPrefix) || 'blog';
 const authors = await getCollection('authors');
 const categories = await getCollection('categories');
 
@@ -48,7 +52,7 @@ function getCategoryName(categorySlug: string | undefined) {
 }
 ---
 
-<AdminLayout title="Posts - Curso de Piano Admin">
+<AdminLayout title="Posts - CNX Agency Admin">
     <!-- Page Header -->
     <div class="mb-8 flex items-center justify-between">
         <div>
@@ -103,6 +107,37 @@ function getCategoryName(categorySlug: string | undefined) {
         </div>
     </div>
 
+    <!-- Busca e Filtros -->
+    {sortedPosts.length > 0 && (
+        <div class="flex flex-wrap gap-3 mb-4">
+            <input
+                type="search"
+                id="posts-search"
+                placeholder="Buscar por título ou slug..."
+                class="admin-input flex-1 min-w-[200px]"
+                style="max-width: 320px;"
+            />
+            <select id="posts-filter-status" class="admin-input" style="width: auto;">
+                <option value="">Todos os status</option>
+                <option value="published">Publicados</option>
+                <option value="draft">Rascunhos</option>
+            </select>
+            <select id="posts-filter-author" class="admin-input" style="width: auto;">
+                <option value="">Todos os autores</option>
+                {authors.map((a) => (
+                    <option value={a.id}>{a.data.name}</option>
+                ))}
+            </select>
+            <select id="posts-filter-category" class="admin-input" style="width: auto;">
+                <option value="">Todas as categorias</option>
+                {categories.map((c) => (
+                    <option value={c.id}>{c.data.name}</option>
+                ))}
+            </select>
+            <span id="posts-filter-count" class="text-xs text-[#737373] self-center"></span>
+        </div>
+    )}
+
     <!-- Posts Table -->
     <div class="admin-card overflow-hidden">
         {sortedPosts.length > 0 ? (
@@ -122,7 +157,14 @@ function getCategoryName(categorySlug: string | undefined) {
                         {sortedPosts.map((post) => {
                             const isPublished = !!post.data.publishedDate;
                             return (
-                                <tr>
+                                <tr
+                                    class="post-row"
+                                    data-title={(post.data.title || '').toLowerCase()}
+                                    data-slug={(post.data.slug || '').toLowerCase()}
+                                    data-author={post.data.author || ''}
+                                    data-category={post.data.category || ''}
+                                    data-status={isPublished ? 'published' : 'draft'}
+                                >
                                     <td>
                                         <div class="font-semibold text-[#e5e5e5] mb-1">{post.data.title}</div>
                                         <div class="text-xs text-[#737373] font-mono">/{post.data.slug}</div>
@@ -155,8 +197,17 @@ function getCategoryName(categorySlug: string | undefined) {
                                             >
                                                 Editar
                                             </a>
+                                            <button
+                                                type="button"
+                                                data-slug={post.data.slug}
+                                                data-title={post.data.title}
+                                                class="admin-btn admin-btn-secondary text-sm duplicate-post-btn"
+                                                title="Duplicar como rascunho"
+                                            >
+                                                📋 Duplicar
+                                            </button>
                                             <a 
-                                                href={`/${post.id}`}
+                                                href={getPostUrl({ ...post, data: { ...post.data, slug: post.data.slug || post.id } }, blogPermalinkStructure, blogUrlPrefix)}
                                                 target="_blank"
                                                 class="admin-btn admin-btn-secondary text-sm"
                                             >
@@ -340,8 +391,42 @@ function getCategoryName(categorySlug: string | undefined) {
             }
         }
 
+        async function handleDuplicatePost(slug, button) {
+            if (!slug) return;
+            if (button) {
+                button.disabled = true;
+                button.textContent = 'Duplicando...';
+            }
+            try {
+                const res = await fetch('/api/admin/posts/duplicate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ slug }),
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Post duplicado como rascunho. Redirecionando...', 'success');
+                    setTimeout(function() { window.location.href = '/admin/posts/' + data.slug; }, 800);
+                } else {
+                    showToast(data.error || 'Erro ao duplicar post', 'error');
+                    if (button) {
+                        button.disabled = false;
+                        button.textContent = '📋 Duplicar';
+                    }
+                }
+            } catch (e) {
+                console.error('\x1b[31m✗ [X] Erro ao duplicar post:\x1b[0m', e);
+                showToast('Erro de rede ao duplicar post', 'error');
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = '📋 Duplicar';
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const deleteButtons = document.querySelectorAll('.delete-post-btn');
+            const duplicateButtons = document.querySelectorAll('.duplicate-post-btn');
 
             deleteButtons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -351,11 +436,54 @@ function getCategoryName(categorySlug: string | undefined) {
                     if (slug && title) {
                         openModal(slug, title);
                     } else {
-                        console.error('❌ Erro: slug ou title não encontrado');
-                        showToast('Não foi possível identificar o post selecionado.');
+                        console.error('\x1b[31m✗ [X] Erro: slug ou title não encontrado\x1b[0m');
+                        showToast('Não foi possível identificar o post selecionado.', 'error');
                     }
                 });
             });
+
+            duplicateButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const slug = this.getAttribute('data-slug');
+                    if (slug) handleDuplicatePost(slug, this);
+                });
+            });
+
+            function applyPostsFilter() {
+                var search = (document.getElementById('posts-search')?.value || '').toLowerCase().trim();
+                var status = document.getElementById('posts-filter-status')?.value || '';
+                var author = document.getElementById('posts-filter-author')?.value || '';
+                var category = document.getElementById('posts-filter-category')?.value || '';
+                var rows = document.querySelectorAll('.post-row');
+                var visible = 0;
+                rows.forEach(function(row) {
+                    var title = row.getAttribute('data-title') || '';
+                    var slug = row.getAttribute('data-slug') || '';
+                    var rowAuthor = row.getAttribute('data-author') || '';
+                    var rowCategory = row.getAttribute('data-category') || '';
+                    var rowStatus = row.getAttribute('data-status') || '';
+                    var matchSearch = !search || title.includes(search) || slug.includes(search);
+                    var matchStatus = !status || rowStatus === status;
+                    var matchAuthor = !author || rowAuthor === author;
+                    var matchCategory = !category || rowCategory === category;
+                    var show = matchSearch && matchStatus && matchAuthor && matchCategory;
+                    row.style.display = show ? '' : 'none';
+                    if (show) visible++;
+                });
+                var countEl = document.getElementById('posts-filter-count');
+                if (countEl) countEl.textContent = visible + ' de ' + rows.length + ' posts';
+            }
+
+            var searchEl = document.getElementById('posts-search');
+            var statusEl = document.getElementById('posts-filter-status');
+            var authorEl = document.getElementById('posts-filter-author');
+            var categoryEl = document.getElementById('posts-filter-category');
+            if (searchEl) searchEl.addEventListener('input', applyPostsFilter);
+            if (searchEl) searchEl.addEventListener('keyup', applyPostsFilter);
+            if (statusEl) statusEl.addEventListener('change', applyPostsFilter);
+            if (authorEl) authorEl.addEventListener('change', applyPostsFilter);
+            if (categoryEl) categoryEl.addEventListener('change', applyPostsFilter);
+            applyPostsFilter();
 
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', closeModal);

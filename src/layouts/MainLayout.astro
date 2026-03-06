@@ -1,9 +1,17 @@
 ---
+/**
+ * MainLayout.astro
+ *
+ * Layout base para modo Blog/Agência (tema classic).
+ * Inclui canonical para SEO e indexação pelo Google.
+ */
+
 import { getEntry } from 'astro:content';
 import Header from '../themes/classic/components/Header.astro';
 import Footer from '../themes/classic/components/Footer.astro';
 import CookieConsent from '../components/CookieConsent.astro';
 import { readSingleton } from '../utils/singleton-utils';
+import { readSiteSettings } from '../utils/read-site-settings';
 import '../styles/global.css';
 import '@fontsource/inter';
 import '@fontsource/outfit';
@@ -12,69 +20,25 @@ interface Props {
     title?: string;
     description?: string;
     ogImage?: string;
-    pageType?: 'website' | 'article' | 'contact';
-    authorName?: string;
-    publishedDate?: string;
 }
-
-const siteSettings = await getEntry('siteSettings', 'settings').catch(() => null);
 
 const { 
-    title = siteSettings?.data?.siteName || "Curso de Piano Online",
-    description = siteSettings?.data?.description || "Aprenda a tocar piano online, direto ao ponto e sem enrolação.",
+    title = "Meu Site",
+    description = "Bem-vindo ao meu site",
     ogImage = "/images/og-default.png",
-    pageType = 'website',
-    authorName = "Professor de Piano",
-    publishedDate,
 } = Astro.props;
 
-const keywords = siteSettings?.data?.keywords || "";
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://cursodepiano.com.br');
-
-// --- JSON-LD Schema Generation ---
-const schema: any = {
-    "@context": "https://schema.org",
-};
-
-if (pageType === 'website') {
-    schema["@type"] = "Course";
-    schema["name"] = title;
-    schema["description"] = description;
-    schema["provider"] = {
-        "@type": "Organization",
-        "name": authorName || "Curso de Piano",
-        "sameAs": canonicalURL.origin
-    };
-    schema["aggregateRating"] = {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "bestRating": "5",
-        "ratingCount": "1284"
-    };
-    schema["offers"] = {
-        "@type": "Offer",
-        "category": "Paid"
-    };
-} else if (pageType === 'article') {
-    schema["@type"] = "BlogPosting";
-    schema["headline"] = title;
-    schema["description"] = description;
-    if (authorName) {
-        schema["author"] = {
-            "@type": "Person",
-            "name": authorName
-        };
-    }
-    if (publishedDate) schema["datePublished"] = publishedDate;
-    schema["image"] = new URL(ogImage, Astro.site || 'https://cursodepiano.com.br').href;
-} else if (pageType === 'contact') {
-    schema["@type"] = "ContactPage";
-    schema["name"] = title;
-    schema["description"] = description;
-}
-
 const theme = await getEntry('siteThemes', 'classic');
+const siteSettings = await getEntry('siteSettings', 'settings').catch(() => null);
+const siteConfig   = await readSiteSettings();
 const colorScheme: 'dark' | 'light' = (siteSettings?.data?.colorScheme as 'dark' | 'light') || 'dark';
+
+// Canonical URL: preferir settings, fallback para URL da requisição
+const canonicalBase = (siteConfig.canonicalUrl as string)?.trim() || '';
+const pathname      = Astro.url.pathname.replace(/\/$/, '') || '/';
+const canonicalHref = canonicalBase
+    ? `${canonicalBase.replace(/\/$/, '')}${pathname === '/' ? '' : pathname}`
+    : Astro.url.origin + pathname;
 const pixelSettings = await readSingleton('pixels', 'classic').catch(() => null);
 const gaId = pixelSettings?.googleAnalyticsId || '';
 const fbPixelId = pixelSettings?.facebookPixelId || '';
@@ -106,33 +70,15 @@ const secondaryRGB = hexToRgb(secondaryColor);
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
-		<link rel="icon" type="image/png" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="canonical" href={canonicalHref} />
 		<meta name="generator" content={Astro.generator} />
-		
-        <!-- Primary Meta Tags -->
 		<title>{title}</title>
         <meta name="description" content={description} />
-        <meta name="keywords" content={keywords} />
-        <link rel="canonical" href={canonicalURL} />
 
-        <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={canonicalURL} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        {ogImage && <meta property="og:image" content={new URL(ogImage, canonicalURL.origin)} />}
-
-        <!-- Twitter -->
-        <meta property="twitter:card" content="summary_large_image" />
-        <meta property="twitter:url" content={canonicalURL} />
-        <meta property="twitter:title" content={title} />
-        <meta property="twitter:description" content={description} />
-        {ogImage && <meta property="twitter:image" content={new URL(ogImage, canonicalURL.origin)} />}
-
-        <!-- JSON-LD Structured Data -->
-        <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
+        {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.url)} />}
 
         <!-- GA e Meta Pixel são injetados via CookieConsent apenas após consentimento -->
 
