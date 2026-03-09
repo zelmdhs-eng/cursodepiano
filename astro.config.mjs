@@ -4,27 +4,18 @@ import vercel from '@astrojs/vercel';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
 import markdoc from '@astrojs/markdoc';
-import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-    site: 'https://cursodepiano.com.br',
     output: 'server',
     adapter: vercel(),
-    security: {
-        checkOrigin: false,
-    },
     integrations: [
-        react(),
-        tailwind(),
-        markdoc(),
-        sitemap({
-            filter: (page) =>
-                !page.includes('/admin') &&
-                !page.includes('/api') &&
-                !page.includes('/setup') &&
-                !page.includes('/import')
-        })
+        react({
+            jsxRuntime: 'automatic',
+            jsxImportSource: 'react',
+        }),
+        tailwind(), 
+        markdoc()
     ],
-    // Reset Trigger: 2026-03-03 08:37
+    // Reset Trigger: 2026-02-07 11:40
 });

@@ -24,6 +24,7 @@ interface SocialLink {
 }
 
 interface FooterData {
+    siteName?: string;
     copyright?: string;
     description?: string;
     columns?: FooterColumn[];
@@ -190,6 +191,21 @@ export default function FooterEditor({ initialData }: Props) {
                     <div className="space-y-4">
                         <div>
                             <label className="block text-sm font-semibold text-[#e5e5e5] mb-2">
+                                Nome do Site (exibido no rodapé)
+                            </label>
+                            <input
+                                type="text"
+                                value={data.siteName || ''}
+                                onChange={(e) => updateField('siteName', e.target.value)}
+                                className="admin-input"
+                                placeholder="Ex: Minha Empresa"
+                            />
+                            <p className="text-xs text-[#737373] mt-1">
+                                Nome exibido em destaque no canto esquerdo do rodapé
+                            </p>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-[#e5e5e5] mb-2">
                                 Texto de Copyright
                             </label>
                             <input
@@ -197,7 +213,7 @@ export default function FooterEditor({ initialData }: Props) {
                                 value={data.copyright || ''}
                                 onChange={(e) => updateField('copyright', e.target.value)}
                                 className="admin-input"
-                                placeholder="Ex: © 2024 Curso de Piano. Todos os direitos reservados."
+                                placeholder="Ex: © 2024 CNX Agency. Todos os direitos reservados."
                             />
                         </div>
                         <div>

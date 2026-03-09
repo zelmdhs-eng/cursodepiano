@@ -6,8 +6,9 @@
  * Os dados são salvos no singleton menu.yaml do tema ativo.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useToast, ToastList } from './Toast';
+import AdminImagePreview from './AdminImagePreview';
 
 interface MenuItem {
     label: string;
@@ -33,6 +34,7 @@ export default function MenuEditor({ initialData }: Props) {
     const [isSaving, setIsSaving]   = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [logoPreviewBlob, setLogoPreviewBlob] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -41,6 +43,10 @@ export default function MenuEditor({ initialData }: Props) {
             setData(initialData);
         }
     }, [initialData]);
+
+    const updateField = <K extends keyof MenuData>(field: K, value: MenuData[K]) => {
+        setData(prev => ({ ...prev, [field]: value }));
+    };
 
     if (!isMounted) {
         return (
@@ -52,14 +58,12 @@ export default function MenuEditor({ initialData }: Props) {
         );
     }
 
-    const updateField = <K extends keyof MenuData>(field: K, value: MenuData[K]) => {
-        setData(prev => ({ ...prev, [field]: value }));
-    };
-
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        const blobUrl = URL.createObjectURL(file);
+        setLogoPreviewBlob(blobUrl);
         setIsUploading(true);
         const formData = new FormData();
         formData.append('file', file);
@@ -75,9 +79,11 @@ export default function MenuEditor({ initialData }: Props) {
                 showToast('error', 'Erro no upload', 'Não foi possível enviar o logo');
             }
         } catch (err) {
-            console.error('❌ Erro no upload do logo:', err);
+            console.error('\x1b[31m✗ Erro no upload do logo:\x1b[0m', err);
             showToast('error', 'Erro no upload');
         } finally {
+            URL.revokeObjectURL(blobUrl);
+            setLogoPreviewBlob(null);
             setIsUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
@@ -231,10 +237,11 @@ export default function MenuEditor({ initialData }: Props) {
                     {/* Logo Imagem */}
                     {data.logoType === 'image' && (
                         <div className="space-y-4">
-                            {data.logoImage && (
+                            {(data.logoImage || logoPreviewBlob) && (
                                 <div className="flex items-center gap-4 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                    <img
-                                        src={data.logoImage}
+                                    <AdminImagePreview
+                                        src={data.logoImage || ''}
+                                        previewBlobUrl={logoPreviewBlob}
                                         alt="Logo atual"
                                         className="h-12 w-auto object-contain rounded"
                                         style={{ maxWidth: '200px' }}

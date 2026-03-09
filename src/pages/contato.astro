@@ -1,23 +1,52 @@
 ---
 /**
  * contato.astro - Página de Contato
- * 
- * Página de contato seguindo o mesmo padrão de design da home.
- * Estrutura: Hero, Informações de Contato, Formulário, CTA
+ *
+ * Roteia para o componente correto conforme siteMode:
+ * - local → themes/local/Contato.astro (identidade visual azul/WhatsApp)
+ * - blog  → MainLayout com conteúdo do tema classic (roxo/preto)
  */
 
 import { getEntry } from 'astro:content';
 import MainLayout from '../layouts/MainLayout.astro';
+import LocalContato from '../themes/local/Contato.astro';
 import { readSingleton } from '../utils/singleton-utils';
+import { getSiteContactInfo } from '../utils/site-contact';
 
-// Obter tema ativo
-const settings = await getEntry('siteSettings', 'settings');
-const activeThemeId = settings?.data.activeTheme || 'classic';
+const settings = await getEntry('siteSettings', 'settings').catch(() => null);
+const siteMode = settings?.data?.siteMode || 'blog';
+const isLocal = siteMode === 'local';
 
-const data = await readSingleton('contact', activeThemeId);
+let data: Record<string, unknown> | null;
+if (isLocal) {
+    const localContact = await readSingleton('contact', 'local');
+    if (localContact) {
+        data = localContact;
+    } else {
+        const [localHome, contact] = await Promise.all([
+            readSingleton('home', 'local') || {},
+            getSiteContactInfo(),
+        ]);
+        data = {
+            heroTitle: 'Entre em Contato',
+            heroSubtitle: localHome.ctaText || 'Estamos prontos para atender. Entre em contato pelo WhatsApp, telefone ou e-mail.',
+            email: localHome.companyEmail || '',
+            phone: contact.phone || contact.whatsapp,
+            address: [localHome.companyAddress, localHome.companyCity, localHome.companyState, localHome.companyCEP].filter(Boolean).join(' - '),
+        };
+    }
+} else {
+    const activeThemeId = settings?.data?.activeTheme || 'classic';
+    data = await readSingleton('contact', activeThemeId);
+}
+
+const siteName = isLocal ? ((await readSingleton('home', 'local'))?.companyName || 'Site') : 'CNX Agency';
 ---
 
-<MainLayout title={`${data?.heroTitle || 'Contato'} - Curso de Piano Online`} pageType="contact">
+{isLocal ? (
+    <LocalContato data={data || {}} siteName={siteName} />
+) : (
+<MainLayout title={`${data?.heroTitle || 'Contato'} - ${siteName}`}>
     
     <!-- HERO SECTION -->
     <section class="relative min-h-[70vh] flex items-center justify-center pt-24 md:pt-32 overflow-hidden">
@@ -80,7 +109,7 @@ const data = await readSingleton('contact', activeThemeId);
                                 </div>
                                 <div>
                                     <p class="text-sm text-slate-500 mb-1">Telefone</p>
-                                    <a href={`tel:${data.phone.replace(/\D/g, '')}`} class="text-white hover:text-primary transition-colors">
+                                    <a href={`tel:${String(data.phone || '').replace(/\D/g, '')}`} class="text-white hover:text-primary transition-colors">
                                         {data.phone}
                                     </a>
                                 </div>
@@ -126,7 +155,7 @@ const data = await readSingleton('contact', activeThemeId);
                 <div class="p-8 md:p-12 rounded-2xl bg-white/5 border border-white/10 hover:border-primary/50 transition-all">
                     <h2 class="text-3xl font-heading font-bold text-white mb-8">{data?.formTitle || 'Envie sua Mensagem'}</h2>
                     
-                    <form class="space-y-6" id="contact-form">
+                    <form class="space-y-6" id="contact-form" onsubmit="return false;">
                         <div>
                             <label for="name" class="block text-sm font-semibold text-slate-300 mb-2">Nome</label>
                             <input 
@@ -229,20 +258,49 @@ const data = await readSingleton('contact', activeThemeId);
     <script define:vars={{ successMessage: data?.formSuccessMessage }}>
         const form = document.getElementById('contact-form');
         const formMessage = document.getElementById('form-message');
+        const submitBtn = form?.querySelector('button[type="submit"]');
 
         form?.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // Simulate form submission (replace with actual API call)
-            formMessage.textContent = successMessage || 'Mensagem enviada com sucesso!';
-            formMessage.classList.remove('hidden', 'bg-red-500/20', 'border-red-500/40');
-            formMessage.classList.add('bg-green-500/20', 'border', 'border-green-500/40', 'text-green-400');
-            
-            form.reset();
-            
-            setTimeout(() => {
-                formMessage.classList.add('hidden');
-            }, 5000);
+            if (!form || !formMessage) return;
+
+            const nameEl = form.querySelector('[name="name"]');
+            const emailEl = form.querySelector('[name="email"]');
+            const subjectEl = form.querySelector('[name="subject"]');
+            const messageEl = form.querySelector('[name="message"]');
+            const name = (nameEl?.value ?? '').toString().trim();
+            const email = (emailEl?.value ?? '').toString().trim();
+            const subject = (subjectEl?.value ?? '').toString().trim();
+            const message = (messageEl?.value ?? '').toString().trim();
+
+            formMessage.classList.remove('hidden', 'bg-red-500/20', 'border-red-500/40', 'bg-green-500/20', 'border-green-500/40', 'text-green-400');
+            formMessage.style.display = 'block';
+            formMessage.innerHTML = '<span class="inline-flex items-center gap-2">⏳ Enviando sua mensagem...</span>';
+            submitBtn?.setAttribute('disabled', 'true');
+
+            try {
+                const res = await fetch('/api/leads', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, subject, message, source: 'contato' }),
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    formMessage.innerHTML = '<span class="inline-flex items-center gap-2">✅ ' + (successMessage || 'Mensagem enviada com sucesso! Recebemos seu contato e retornaremos em breve.') + '</span>';
+                    formMessage.classList.add('bg-green-500/20', 'border', 'border-green-500/40', 'text-green-400');
+                    form.reset();
+                } else {
+                    formMessage.innerHTML = '<span class="inline-flex items-center gap-2">❌ ' + (data.error || 'Erro ao enviar. Tente novamente.') + '</span>';
+                    formMessage.classList.add('bg-red-500/20', 'border', 'border-red-500/40', 'text-red-400');
+                }
+            } catch (err) {
+                formMessage.innerHTML = '<span class="inline-flex items-center gap-2">❌ Erro de conexão. Verifique sua internet e tente novamente.</span>';
+                formMessage.classList.add('bg-red-500/20', 'border', 'border-red-500/40', 'text-red-400');
+            }
+            submitBtn?.removeAttribute('disabled');
+            setTimeout(function() { formMessage.classList.add('hidden'); }, 6000);
         });
     </script>
 </MainLayout>
+)}

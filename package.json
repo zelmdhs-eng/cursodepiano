@@ -3,21 +3,18 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
+    "dev": "ulimit -n 65536 2>/dev/null || true; bun run astro dev",
+    "prebuild": "bun run scripts/ensure-workflow.ts",
+    "build": "bun run astro build",
+    "preview": "bun run astro preview",
     "astro": "astro",
     "deploy": "vercel --prod"
   },
   "dependencies": {
     "@astrojs/markdoc": "^0.15.10",
     "@astrojs/react": "^4.4.2",
-    "@astrojs/sitemap": "^3.7.0",
     "@astrojs/tailwind": "^6.0.2",
     "@astrojs/vercel": "^9.0.4",
-    "@blocknote/core": "^0.47.0",
-    "@blocknote/mantine": "^0.47.1",
-    "@blocknote/react": "^0.47.0",
     "@codemirror/basic-setup": "^0.20.0",
     "@codemirror/commands": "^6.10.2",
     "@codemirror/lang-markdown": "^6.5.0",
@@ -56,8 +53,5 @@
     "tailwindcss": "^3.4.17",
     "turndown": "^7.2.2",
     "vanilla-cookieconsent": "^3.1.0"
-  },
-  "devDependencies": {
-    "@types/turndown": "^5.0.6"
   }
 }

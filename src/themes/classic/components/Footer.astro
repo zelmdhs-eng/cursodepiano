@@ -6,16 +6,21 @@
  * Lê os dados do singleton 'footer' para renderizar o rodapé dinamicamente.
  */
 
+import { getEntry } from 'astro:content';
 import { readSingleton } from '../../../utils/singleton-utils';
 
 const { activeThemeId } = Astro.props;
 const year = new Date().getFullYear();
 
 // Carregar dados do rodapé do singleton do tema ativo
-const footerData = await readSingleton('footer', activeThemeId);
-const copyright = footerData?.copyright || `© ${year} Curso de Piano - Built with Astro Structural Themes.`;
+const footerData  = await readSingleton('footer', activeThemeId);
+const siteSettings = await getEntry('siteSettings', 'settings').catch(() => null);
+const fallbackName = siteSettings?.data?.siteName || 'Meu Site';
+
+const siteName    = footerData?.siteName    || fallbackName;
+const copyright   = footerData?.copyright   || `© ${year} ${fallbackName}. Todos os direitos reservados.`;
 const description = footerData?.description || 'Transformando ideias em interfaces de alto impacto com Astro, Keystatic e Inteligência Artificial.';
-const columns = footerData?.columns || [];
+const columns     = footerData?.columns     || [];
 const socialLinks = footerData?.socialLinks || [];
 ---
 
@@ -23,9 +28,7 @@ const socialLinks = footerData?.socialLinks || [];
     <div class="container mx-auto">
         <div class="grid md:grid-cols-4 gap-12 mb-16">
             <div class="col-span-2">
-                <div class="text-2xl font-heading font-black text-white mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-                    {footerData?.title || 'Curso de Piano'}
-                </div>
+                <div class="text-2xl font-heading font-black text-white mb-6">{siteName}</div>
                 <p class="text-slate-500 max-w-sm leading-relaxed">{description}</p>
             </div>
             {columns.map((column: any) => (
@@ -54,19 +57,12 @@ const socialLinks = footerData?.socialLinks || [];
                                 class="hover:text-primary transition-colors"
                                 title={social.platform}
                             >
-                                {social.platform === 'Instagram' && (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-                                )}
-                                {social.platform === 'YouTube' && (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>
-                                )}
-                                {social.platform !== 'Instagram' && social.platform !== 'YouTube' && (
-                                    social.icon || social.platform
-                                )}
+                                {social.icon || social.platform}
                             </a>
                         ))}
                     </div>
                 )}
+                <span>Classic Theme v1.0</span>
             </div>
         </div>
     </div>
