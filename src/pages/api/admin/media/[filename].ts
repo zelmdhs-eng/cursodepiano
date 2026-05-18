@@ -1,12 +1,12 @@
 import type { APIRoute } from 'astro';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { isGitHubConfigured, githubDeleteFile } from '../../../../utils/github-api';
 
 /**
  * api/admin/media/[filename].ts
  * 
  * API route para deletar uma imagem específica da biblioteca de mídia.
+ * Aceita tipo na query string ou detecta automaticamente.
  */
 
 const BASE_IMAGES_DIR = path.resolve('./public/images');
@@ -15,80 +15,89 @@ const MEDIA_TYPES = ['posts', 'authors', 'themes', 'general'] as const;
 export const DELETE: APIRoute = async ({ params, url }) => {
     try {
         const { filename } = params;
-
+        
         if (!filename) {
-            return new Response(JSON.stringify({ success: false, error: 'Nome não fornecido' }), {
-                status: 400, headers: { 'Content-Type': 'application/json' },
+            console.error('❌ Nome do arquivo não fornecido');
+            return new Response(JSON.stringify({
+                success: false,
+                error: 'Nome do arquivo não fornecido',
+            }), {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
             });
         }
 
+        // Decodificar o nome do arquivo (pode ter sido codificado na URL)
         let decodedFilename: string;
-        try { decodedFilename = decodeURIComponent(filename); }
-        catch { decodedFilename = filename; }
-
-        const typeFromQuery = url.searchParams.get('type');
-
-        // 1. FLUXO GITHUB (Produção Vercel)
-        if (isGitHubConfigured()) {
-            let deleted = false;
-            let pathsToTry = [];
-
-            if (typeFromQuery && MEDIA_TYPES.includes(typeFromQuery as any)) {
-                pathsToTry.push(`public/images/${typeFromQuery}/${decodedFilename}`);
-            } else {
-                pathsToTry = MEDIA_TYPES.map(t => `public/images/${t}/${decodedFilename}`);
-            }
-
-            for (const repoPath of pathsToTry) {
-                try {
-                    const succ = await githubDeleteFile(repoPath, `media: delete image "${decodedFilename}"`);
-                    if (succ) { deleted = true; break; }
-                } catch {
-                    continue; // Ignorar erro e tentar o próximo caminho
-                }
-            }
-
-            if (deleted) {
-                return new Response(JSON.stringify({ success: true, message: 'Imagem deletada (GitHub)' }), {
-                    status: 200, headers: { 'Content-Type': 'application/json' },
-                });
-            }
-            // Se falhou no GitHub (ex: falta de permissão ou não encontrou), não joga erro. 
-            // Permite tentar deletar localmente abaixo.
+        try {
+            decodedFilename = decodeURIComponent(filename);
+        } catch {
+            // Se falhar, usar o filename original
+            decodedFilename = filename;
         }
-
-        // 2. FLUXO LOCAL FILESYSTEM (Dev ou Vercel sem integração GitHub 100% ok)
+        
+        console.log(`🔍 Tentando deletar: ${decodedFilename}`);
+        
+        // Tentar obter tipo da query string
+        const typeFromQuery = url.searchParams.get('type');
+        console.log(`📁 Tipo fornecido: ${typeFromQuery || 'não fornecido'}`);
+        
         let filePath: string | null = null;
-
+        
+        // Se tipo foi fornecido, usar diretamente
         if (typeFromQuery && MEDIA_TYPES.includes(typeFromQuery as any)) {
             const mediaDir = path.join(BASE_IMAGES_DIR, typeFromQuery);
             filePath = path.join(mediaDir, decodedFilename);
-            try { await fs.access(filePath); }
-            catch { filePath = null; }
+            console.log(`📂 Caminho direto: ${filePath}`);
+            
+            // Verificar se existe
+            try {
+                await fs.access(filePath);
+            } catch {
+                console.error(`❌ Arquivo não encontrado em ${filePath}`);
+                filePath = null;
+            }
         }
-
+        
+        // Se não encontrou com tipo, buscar em todos os diretórios
         if (!filePath) {
+            console.log('🔍 Buscando em todos os diretórios...');
             for (const mediaType of MEDIA_TYPES) {
-                const testPath = path.join(BASE_IMAGES_DIR, mediaType, decodedFilename);
+                const mediaDir = path.join(BASE_IMAGES_DIR, mediaType);
+                const testPath = path.join(mediaDir, decodedFilename);
                 try {
                     await fs.access(testPath);
                     filePath = testPath;
+                    console.log(`✅ Arquivo encontrado em: ${filePath}`);
                     break;
-                } catch { continue; }
+                } catch {
+                    continue;
+                }
             }
         }
 
         if (!filePath) {
-            return new Response(JSON.stringify({ success: false, error: 'Arquivo não encontrado' }), {
-                status: 404, headers: { 'Content-Type': 'application/json' },
+            console.error(`❌ Arquivo não encontrado: ${decodedFilename}`);
+            return new Response(JSON.stringify({
+                success: false,
+                error: `Arquivo "${decodedFilename}" não encontrado em nenhum diretório`,
+            }), {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
             });
         }
 
+        // Deletar o arquivo
         await fs.unlink(filePath);
-        return new Response(JSON.stringify({ success: true, message: 'Imagem deletada localmente' }), {
-            status: 200, headers: { 'Content-Type': 'application/json' },
-        });
+        console.log(`✅ Arquivo deletado com sucesso: ${filePath}`);
 
+        return new Response(JSON.stringify({
+            success: true,
+            message: 'Imagem deletada com sucesso',
+        }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
     } catch (error: any) {
         console.error('❌ Erro ao deletar mídia:', error);
         return new Response(JSON.stringify({

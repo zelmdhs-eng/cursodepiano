@@ -67,6 +67,47 @@ html.light {
     --admin-toggle-icon:     ☀️;
 }
 
+/* ─── Modo Local: sinalização visual nas bordas ───────────────────────────────
+ * Quando siteMode === 'local', o admin exibe bordas em destaque (teal/emerald)
+ * para diferenciar claramente do modo Blog normal.
+ */
+[data-site-mode="local"] .w-64 {
+    border-left: 3px solid #10b981 !important;
+    box-shadow: inset 3px 0 12px rgba(16, 185, 129, 0.08);
+}
+[data-site-mode="local"] .admin-main-area {
+    border-left: 1px solid rgba(16, 185, 129, 0.2);
+}
+[data-site-mode="local"] .h-8 {
+    border-bottom-color: rgba(16, 185, 129, 0.25) !important;
+    box-shadow: 0 1px 0 0 rgba(16, 185, 129, 0.15);
+}
+/* Badge sutil no canto da barra superior quando em modo local */
+[data-site-mode="local"] #site-mode-toggle {
+    border-color: rgba(16, 185, 129, 0.3) !important;
+    background: rgba(16, 185, 129, 0.06) !important;
+}
+
+/* Base dos botões do toggle modo (antes do JS) */
+.site-mode-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--admin-bar-text);
+    cursor: pointer;
+}
+.site-mode-btn:hover { color: var(--admin-bar-text-hover); }
+.site-mode-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+/* Modal de confirmação ao trocar modo (Header + página Modo) */
+#mode-confirm-dialog,
+#modo-page-confirm-dialog {
+    z-index: 9999;
+}
+#mode-confirm-dialog::backdrop,
+#modo-page-confirm-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+}
+
 /* Admin Cards */
 .admin-card {
     background: var(--admin-surface);
@@ -356,6 +397,17 @@ html.light {
     background: var(--admin-surface-hover);
     color: var(--admin-text);
     border-left: 2px solid var(--admin-accent);
+}
+
+/* Configurações expandível no sidebar */
+.config-group summary {
+    list-style: none;
+}
+.config-group summary::-webkit-details-marker {
+    display: none;
+}
+.config-group[open] .config-chevron {
+    transform: rotate(90deg);
 }
 
 /* Admin Table */

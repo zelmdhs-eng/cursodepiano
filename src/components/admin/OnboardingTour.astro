@@ -70,6 +70,16 @@ const { postCount, categoryCount, isDefaultAccount } = Astro.props;
         <!-- Tasks -->
         <div style="padding: 0.875rem 1.25rem; display: flex; flex-direction: column; gap: 0.375rem;" id="checklist-tasks">
 
+            <label class="checklist-item checklist-item-workflow" data-key="workflow" data-href="/admin/ajuda#primeiros-passos">
+                <input type="checkbox" class="checklist-cb" />
+                <span class="checklist-icon">🔄</span>
+                <div class="checklist-text">
+                    <span class="checklist-label">Ativar atualizações automáticas do template</span>
+                    <span class="checklist-desc">Permite receber melhorias futuras com 1 clique no painel (obrigatório)</span>
+                </div>
+                <a href="/admin/ajuda#primeiros-passos" class="checklist-action checklist-action-workflow" tabindex="-1">Ativar →</a>
+            </label>
+
             <label class="checklist-item" data-key="password" data-href="/admin/authors">
                 <input type="checkbox" class="checklist-cb" />
                 <span class="checklist-icon">🔑</span>
@@ -303,6 +313,16 @@ const { postCount, categoryCount, isDefaultAccount } = Astro.props;
         const dismissed = localStorage.getItem(KEY_DISMISSED);
         const wrapper   = document.getElementById('onboarding-checklist');
         if (!wrapper) return;
+
+        // Atualiza link do workflow para GitHub Actions se disponível
+        const actionsUrl = serverData?.dataset.actionsUrl;
+        const workflowItem = wrapper.querySelector<HTMLElement>('.checklist-item-workflow');
+        if (workflowItem && actionsUrl) {
+            workflowItem.dataset.href = actionsUrl;
+            workflowItem.dataset.external = 'true';
+            const link = workflowItem.querySelector<HTMLAnchorElement>('.checklist-action-workflow');
+            if (link) { link.href = actionsUrl; link.target = '_blank'; link.rel = 'noopener noreferrer'; }
+        }
 
         const items = wrapper.querySelectorAll<HTMLElement>('.checklist-item');
         let doneCount = 0;

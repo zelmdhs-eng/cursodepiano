@@ -13,9 +13,9 @@
  *   GITHUB_BRANCH — branch alvo (padrão: main)
  */
 
-const TOKEN = process.env.GITHUB_TOKEN;
-const OWNER = process.env.GITHUB_OWNER;
-const REPO = process.env.GITHUB_REPO;
+const TOKEN  = process.env.GITHUB_TOKEN;
+const OWNER  = process.env.GITHUB_OWNER;
+const REPO   = process.env.GITHUB_REPO;
 const BRANCH = process.env.GITHUB_BRANCH || 'main';
 
 export function isGitHubConfigured(): boolean {
@@ -41,14 +41,9 @@ export async function githubReadFile(
 ): Promise<{ content: string; sha: string } | null> {
     const res = await fetch(`${apiUrl(path)}?ref=${BRANCH}`, {
         headers: headers(),
-        cache: 'no-store'
     });
     if (res.status === 404) return null;
-    if (!res.ok) {
-        const errBody = await res.text().catch(() => '');
-        console.error(`❌ githubReadFile failed: HTTP ${res.status} - ${errBody}`);
-        throw new Error(`GitHub read ${path}: ${res.status}`);
-    }
+    if (!res.ok) throw new Error(`GitHub read ${path}: ${res.status}`);
     const data = await res.json() as { content: string; sha: string };
     const content = Buffer.from(data.content, 'base64').toString('utf-8');
     return { content, sha: data.sha };
@@ -59,10 +54,7 @@ export async function githubListDirectory(
     dirPath: string,
 ): Promise<Array<{ name: string; path: string }>> {
     try {
-        const res = await fetch(`${apiUrl(dirPath)}?ref=${BRANCH}`, {
-            headers: headers(),
-            cache: 'no-store'
-        });
+        const res = await fetch(`${apiUrl(dirPath)}?ref=${BRANCH}`, { headers: headers() });
         if (!res.ok) return [];
         const data = await res.json() as Array<{ name: string; path: string; type: string }>;
         return Array.isArray(data) ? data.filter(f => f.type === 'file') : [];
@@ -98,14 +90,7 @@ export async function githubWriteFile(
         headers: headers(),
         body: JSON.stringify(body),
     });
-
-    if (!res.ok && res.status !== 201) {
-        const errBody = await res.text().catch(() => '');
-        console.error(`❌ githubWriteFile failed: HTTP ${res.status} - ${errBody}`);
-        return false;
-    }
-
-    return true;
+    return res.ok || res.status === 201;
 }
 
 /** Cria ou atualiza um arquivo binário (Buffer) no repositório */

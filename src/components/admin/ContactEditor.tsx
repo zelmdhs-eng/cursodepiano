@@ -31,9 +31,11 @@ interface ContactData {
 
 interface Props {
     initialData?: ContactData;
+    /** Tema do singleton (ex: 'classic', 'local'). Define onde os dados são salvos. */
+    themeId?: string;
 }
 
-export default function ContactEditor({ initialData }: Props) {
+export default function ContactEditor({ initialData, themeId }: Props) {
     const { toasts, showToast, removeToast } = useToast();
     const [data, setData] = useState<ContactData>(initialData || {});
     const [isSaving, setIsSaving] = useState(false);
@@ -62,7 +64,7 @@ export default function ContactEditor({ initialData }: Props) {
             const response = await fetch('/api/admin/singletons/contact', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data }),
+                body: JSON.stringify({ data, themeId }),
             });
 
             const result = await response.json();

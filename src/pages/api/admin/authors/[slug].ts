@@ -120,7 +120,7 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     }
 };
 
-export const DELETE: APIRoute = async ({ params }) => {
+export const DELETE: APIRoute = async ({ params, locals }) => {
     try {
         const { slug } = params;
         if (!slug) {
@@ -129,6 +129,16 @@ export const DELETE: APIRoute = async ({ params }) => {
                 error: 'Slug não fornecido',
             }), {
                 status: 400,
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+
+        if (locals.user?.slug === slug) {
+            return new Response(JSON.stringify({
+                success: false,
+                error: 'Você não pode excluir o próprio usuário logado. Isso o impediria de acessar o sistema.',
+            }), {
+                status: 403,
                 headers: { 'Content-Type': 'application/json' },
             });
         }

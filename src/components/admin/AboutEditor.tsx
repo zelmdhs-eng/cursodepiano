@@ -20,15 +20,26 @@ interface TeamMember {
     photo: string;
 }
 
+interface AboutStat {
+    number: string;
+    label: string;
+}
+
 interface AboutData {
     heroTitle?: string;
     heroSubtitle?: string;
+    heroBackground?: string;
+    aboutImage?: string | null;
+    aboutText?: string;
+    aboutStats?: AboutStat[];
     missionTitle?: string;
     missionDescription?: string;
     visionTitle?: string;
     visionDescription?: string;
     valuesTitle?: string;
     values?: Value[];
+    differentialsTitle?: string;
+    differentials?: string[];
     teamTitle?: string;
     teamMembers?: TeamMember[];
     ctaTitle?: string;
@@ -39,9 +50,11 @@ interface AboutData {
 
 interface Props {
     initialData?: AboutData;
+    /** Tema do singleton (ex: 'classic', 'local'). Define onde os dados são salvos. */
+    themeId?: string;
 }
 
-export default function AboutEditor({ initialData }: Props) {
+export default function AboutEditor({ initialData, themeId }: Props) {
     const { toasts, showToast, removeToast } = useToast();
     const [data, setData] = useState<AboutData>(initialData || {});
     const [isSaving, setIsSaving] = useState(false);
@@ -70,7 +83,7 @@ export default function AboutEditor({ initialData }: Props) {
             const response = await fetch('/api/admin/singletons/about', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data }),
+                body: JSON.stringify({ data, themeId }),
             });
 
             const result = await response.json();
@@ -135,6 +148,50 @@ export default function AboutEditor({ initialData }: Props) {
         }));
     };
 
+    const addStat = () => {
+        setData(prev => ({
+            ...prev,
+            aboutStats: [...(prev.aboutStats || []), { number: '', label: '' }]
+        }));
+    };
+
+    const updateStat = (index: number, field: 'number' | 'label', value: string) => {
+        setData(prev => {
+            const stats = [...(prev.aboutStats || [])];
+            stats[index] = { ...stats[index], [field]: value };
+            return { ...prev, aboutStats: stats };
+        });
+    };
+
+    const removeStat = (index: number) => {
+        setData(prev => ({
+            ...prev,
+            aboutStats: (prev.aboutStats || []).filter((_, i) => i !== index)
+        }));
+    };
+
+    const addDifferential = () => {
+        setData(prev => ({
+            ...prev,
+            differentials: [...(prev.differentials || []), '']
+        }));
+    };
+
+    const updateDifferential = (index: number, value: string) => {
+        setData(prev => {
+            const d = [...(prev.differentials || [])];
+            d[index] = value;
+            return { ...prev, differentials: d };
+        });
+    };
+
+    const removeDifferential = (index: number) => {
+        setData(prev => ({
+            ...prev,
+            differentials: (prev.differentials || []).filter((_, i) => i !== index)
+        }));
+    };
+
     return (
         <>
         <div className="space-y-6">
@@ -194,6 +251,90 @@ export default function AboutEditor({ initialData }: Props) {
                                 rows={3}
                                 placeholder="Descrição do hero"
                             />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-[#e5e5e5] mb-2">
+                                Imagem de fundo do Hero (URL, opcional)
+                            </label>
+                            <input
+                                type="text"
+                                value={data.heroBackground || ''}
+                                onChange={(e) => updateField('heroBackground', e.target.value)}
+                                className="admin-input"
+                                placeholder="Ex: https://exemplo.com/hero.jpg"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Nossa História (imagem + texto + stats) */}
+                <div className="admin-card p-6">
+                    <h3 className="text-lg font-heading font-bold text-[#e5e5e5] mb-4">
+                        Nossa História
+                    </h3>
+                    <p className="text-xs text-[#737373] mb-4">
+                        Imagem, texto principal e estatísticas exibidos na seção de destaque.
+                    </p>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-[#e5e5e5] mb-2">
+                                Imagem da empresa (URL)
+                            </label>
+                            <input
+                                type="text"
+                                value={data.aboutImage || ''}
+                                onChange={(e) => updateField('aboutImage', e.target.value)}
+                                className="admin-input"
+                                placeholder="Ex: https://exemplo.com/empresa.jpg"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-[#e5e5e5] mb-2">
+                                Texto principal
+                            </label>
+                            <textarea
+                                value={data.aboutText || ''}
+                                onChange={(e) => updateField('aboutText', e.target.value)}
+                                className="admin-input resize-none"
+                                rows={4}
+                                placeholder="Descrição da empresa, experiência, qualificações..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-[#e5e5e5] mb-3">
+                                Estatísticas (ex: 10+ anos, 800+ clientes)
+                            </label>
+                            {(data.aboutStats || []).map((stat, index) => (
+                                <div key={index} className="flex gap-3 mb-3">
+                                    <input
+                                        type="text"
+                                        value={stat.number}
+                                        onChange={(e) => updateStat(index, 'number', e.target.value)}
+                                        className="admin-input text-sm flex-1"
+                                        placeholder="Ex: 10+"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={stat.label}
+                                        onChange={(e) => updateStat(index, 'label', e.target.value)}
+                                        className="admin-input text-sm flex-1"
+                                        placeholder="Ex: Anos de experiência"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeStat(index)}
+                                        className="text-red-400 hover:text-red-300 text-sm"
+                                    >
+                                        Remover
+                                    </button>
+                                </div>
+                            ))}
+                            <button
+                                onClick={addStat}
+                                className="admin-btn admin-btn-secondary text-sm"
+                            >
+                                + Adicionar estatística
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -335,6 +476,56 @@ export default function AboutEditor({ initialData }: Props) {
                                 className="admin-btn admin-btn-secondary text-sm"
                             >
                                 + Adicionar Valor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Diferenciais (Por que nos escolher) */}
+                <div className="admin-card p-6">
+                    <h3 className="text-lg font-heading font-bold text-[#e5e5e5] mb-4">
+                        Por que nos escolher?
+                    </h3>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold text-[#e5e5e5] mb-2">
+                                Título da seção
+                            </label>
+                            <input
+                                type="text"
+                                value={data.differentialsTitle || ''}
+                                onChange={(e) => updateField('differentialsTitle', e.target.value)}
+                                className="admin-input"
+                                placeholder="Ex: Por que nos escolher?"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-[#e5e5e5] mb-3">
+                                Lista de diferenciais (um por linha)
+                            </label>
+                            {(data.differentials || []).map((item, index) => (
+                                <div key={index} className="flex gap-2 mb-2">
+                                    <input
+                                        type="text"
+                                        value={item}
+                                        onChange={(e) => updateDifferential(index, e.target.value)}
+                                        className="admin-input text-sm flex-1"
+                                        placeholder="Ex: Profissionais qualificados e certificados"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeDifferential(index)}
+                                        className="text-red-400 hover:text-red-300 text-sm"
+                                    >
+                                        Remover
+                                    </button>
+                                </div>
+                            ))}
+                            <button
+                                onClick={addDifferential}
+                                className="admin-btn admin-btn-secondary text-sm"
+                            >
+                                + Adicionar diferencial
                             </button>
                         </div>
                     </div>

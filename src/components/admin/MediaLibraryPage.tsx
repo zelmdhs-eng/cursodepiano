@@ -1,8 +1,9 @@
 /**
  * MediaLibraryPage.tsx
- * 
+ *
  * Página completa para gerenciar a biblioteca de mídia.
  * Permite visualizar, fazer upload, deletar e usar imagens.
+ * Suporta seleção múltipla para deleção em lote.
  */
 
 import { useState, useEffect } from 'react';
@@ -31,6 +32,8 @@ export default function MediaLibraryPage() {
     const [isMounted, setIsMounted] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [deletingMultiple, setDeletingMultiple] = useState(false);
     const { toasts, showToast: showToastNew, removeToast } = useToast();
 
     useEffect(() => {
@@ -102,6 +105,11 @@ export default function MediaLibraryPage() {
 
     const handleDelete = async () => {
         if (!deleteTarget) return;
+
+        if (deleteTarget.id === '__multiple__') {
+            await handleDeleteMultiple();
+            return;
+        }
 
         const item = deleteTarget;
 
@@ -175,6 +183,60 @@ export default function MediaLibraryPage() {
     const copyUrlToClipboard = (url: string) => {
         navigator.clipboard.writeText(url);
         showToast('info', 'URL copiada!', 'Pronta para colar');
+    };
+
+    const toggleSelect = (id: string, e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setSelectedIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+        });
+    };
+
+    const selectAllFiltered = () => {
+        const ids = new Set(filteredMedia.map((m) => m.id));
+        setSelectedIds(ids);
+    };
+
+    const clearSelection = () => setSelectedIds(new Set());
+
+    const selectedItems = media.filter((m) => selectedIds.has(m.id));
+
+    const openDeleteMultipleModal = () => {
+        if (selectedItems.length === 0) return;
+        setDeleteTarget({ ...selectedItems[0], id: '__multiple__' } as MediaItem);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteMultiple = async () => {
+        if (selectedItems.length === 0) return;
+        setDeletingMultiple(true);
+        let success = 0;
+        let failed = 0;
+        for (const item of selectedItems) {
+            try {
+                let filenameToDelete = item.filename;
+                if (filenameToDelete.includes('/')) filenameToDelete = filenameToDelete.split('/').pop() || filenameToDelete;
+                const encodedFilename = encodeURIComponent(filenameToDelete.trim());
+                const url = item.type ? `/api/admin/media/${encodedFilename}?type=${item.type}` : `/api/admin/media/${encodedFilename}`;
+                const res = await fetch(url, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) success++;
+                else failed++;
+            } catch {
+                failed++;
+            }
+        }
+        setDeletingMultiple(false);
+        setDeleteModalOpen(false);
+        setDeleteTarget(null);
+        setSelectedIds(new Set());
+        setSelectedMedia(null);
+        await fetchMedia();
+        if (failed > 0) showToast('warning', 'Concluído', `${success} removido(s). ${failed} falha(s).`);
+        else showToast('success', 'Removidas', `${success} mídia(s) excluída(s)`);
     };
 
     const filteredMedia = media.filter(item => {
@@ -258,6 +320,38 @@ export default function MediaLibraryPage() {
                 </div>
             </div>
 
+            {/* Barra de seleção múltipla */}
+            {selectedIds.size > 0 && (
+                <div className="admin-card p-4 flex items-center justify-between gap-4">
+                    <span className="text-[#e5e5e5]">
+                        <strong>{selectedIds.size}</strong> selecionada(s)
+                    </span>
+                    <div className="flex gap-2">
+                        <button
+                            type="button"
+                            onClick={selectAllFiltered}
+                            className="admin-btn admin-btn-ghost text-sm"
+                        >
+                            Selecionar todas (filtradas)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={clearSelection}
+                            className="admin-btn admin-btn-ghost text-sm"
+                        >
+                            Desmarcar todas
+                        </button>
+                        <button
+                            type="button"
+                            onClick={openDeleteMultipleModal}
+                            className="admin-btn bg-red-500/20 text-red-400 hover:bg-red-500/30 text-sm"
+                        >
+                            🗑️ Deletar selecionadas
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Search and Filter Bar */}
             <div className="admin-card p-4">
                 <div className="flex gap-3">
@@ -314,12 +408,22 @@ export default function MediaLibraryPage() {
                         <div
                             key={item.id}
                             className={`relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
-                                selectedMedia?.id === item.id
-                                    ? 'border-primary'
-                                    : 'border-white/10 hover:border-primary/50'
+                                selectedIds.has(item.id) ? 'border-[#3b82f6] ring-2 ring-[#3b82f6]/30' :
+                                selectedMedia?.id === item.id ? 'border-primary' : 'border-white/10 hover:border-primary/50'
                             }`}
                             onClick={() => setSelectedMedia(item)}
                         >
+                            {/* Checkbox de seleção */}
+                            <div
+                                className="absolute top-2 left-2 z-10 w-6 h-6 rounded bg-black/60 flex items-center justify-center cursor-pointer hover:bg-black/80"
+                                onClick={(e) => toggleSelect(item.id, e)}
+                            >
+                                {selectedIds.has(item.id) ? (
+                                    <span className="text-white text-sm">✓</span>
+                                ) : (
+                                    <span className="text-white/50 text-xs">☐</span>
+                                )}
+                            </div>
                             <div className="aspect-square bg-[#0a0a0a] flex items-center justify-center">
                                 <img
                                     src={item.url}
@@ -383,12 +487,22 @@ export default function MediaLibraryPage() {
                         <div
                             key={item.id}
                             className={`admin-card p-4 flex items-center gap-4 cursor-pointer transition-all ${
-                                selectedMedia?.id === item.id
-                                    ? 'border-2 border-primary bg-primary/10'
-                                    : 'hover:bg-white/5'
+                                selectedIds.has(item.id) ? 'border-2 border-[#3b82f6] bg-[#3b82f6]/10' :
+                                selectedMedia?.id === item.id ? 'border-2 border-primary bg-primary/10' : 'hover:bg-white/5'
                             }`}
                             onClick={() => setSelectedMedia(item)}
                         >
+                            {/* Checkbox seleção - modo lista */}
+                            <div
+                                className="w-6 h-6 flex-shrink-0 rounded bg-black/40 flex items-center justify-center cursor-pointer hover:bg-black/60"
+                                onClick={(e) => toggleSelect(item.id, e)}
+                            >
+                                {selectedIds.has(item.id) ? (
+                                    <span className="text-white text-sm">✓</span>
+                                ) : (
+                                    <span className="text-white/50 text-xs">☐</span>
+                                )}
+                            </div>
                             <div className="w-20 h-20 rounded-lg overflow-hidden bg-[#0a0a0a] flex-shrink-0">
                                 <img
                                     src={item.url}
@@ -453,16 +567,31 @@ export default function MediaLibraryPage() {
                                 <span>✖</span>
                             </div>
                             <div>
-                                <div className="admin-modal-title">Excluir mídia</div>
+                                <div className="admin-modal-title">
+                                    {deleteTarget.id === '__multiple__' ? 'Excluir mídias selecionadas' : 'Excluir mídia'}
+                                </div>
                             </div>
                         </div>
                         <div className="admin-modal-body">
-                            <p>
-                                Tem certeza que deseja excluir o arquivo "{deleteTarget.filename}"?
-                            </p>
-                            <small>
-                                Esta ação é permanente e não poderá ser desfeita. Verifique se o arquivo não está sendo usado em posts importantes.
-                            </small>
+                            {deleteTarget.id === '__multiple__' ? (
+                                <>
+                                    <p>
+                                        Tem certeza que deseja excluir <strong>{selectedItems.length}</strong> arquivo(s)?
+                                    </p>
+                                    <small>
+                                        Esta ação é permanente e não poderá ser desfeita.
+                                    </small>
+                                </>
+                            ) : (
+                                <>
+                                    <p>
+                                        Tem certeza que deseja excluir o arquivo "{deleteTarget.filename}"?
+                                    </p>
+                                    <small>
+                                        Esta ação é permanente e não poderá ser desfeita. Verifique se o arquivo não está sendo usado em posts importantes.
+                                    </small>
+                                </>
+                            )}
                         </div>
                         <div className="admin-modal-footer">
                             <button
@@ -476,8 +605,9 @@ export default function MediaLibraryPage() {
                                 type="button"
                                 className="admin-modal-btn admin-modal-btn-danger"
                                 onClick={handleDelete}
+                                disabled={deletingMultiple}
                             >
-                                Excluir arquivo
+                                {deletingMultiple ? 'Excluindo...' : deleteTarget.id === '__multiple__' ? `Excluir ${selectedItems.length} arquivo(s)` : 'Excluir arquivo'}
                             </button>
                         </div>
                     </div>
@@ -546,7 +676,7 @@ export default function MediaLibraryPage() {
                             </div>
                             <div className="pt-4 border-t border-white/10">
                                 <button
-                                    onClick={() => handleDelete(selectedMedia)}
+                                    onClick={() => openDeleteModal(selectedMedia)}
                                     className="w-full admin-btn bg-red-500/20 text-red-400 hover:bg-red-500/30"
                                 >
                                     🗑️ Deletar Imagem

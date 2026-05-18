@@ -61,7 +61,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
     try {
         const { slug } = params;
         const body = await request.json();
-        const { title, newSlug, author, category, publishedDate, thumbnail, metaDescription, metaImage, content } = body;
+        const { title, newSlug, author, category, publishedDate, thumbnail, metaTitle, metaDescription, metaImage, content } = body;
         
         if (!slug) {
             return new Response(JSON.stringify({
@@ -97,6 +97,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
             category: category || undefined,
             publishedDate: publishedDate || undefined,
             thumbnail: thumbnail || undefined,
+            metaTitle: metaTitle || undefined,
             metaDescription: metaDescription || undefined,
             metaImage: metaImage || undefined,
         };

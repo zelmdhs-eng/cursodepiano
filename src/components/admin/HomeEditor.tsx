@@ -293,7 +293,7 @@ export default function HomeEditor({ initialData }: Props) {
                                 value={data.heroBadge || ''}
                                 onChange={(e) => updateField('heroBadge', e.target.value)}
                                 className="admin-input"
-                                placeholder="Ex: Bem-vindo à Curso de Piano"
+                                placeholder="Ex: Bem-vindo à CNX Agency"
                             />
                         </div>
                         <div>
